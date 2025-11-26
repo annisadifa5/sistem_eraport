@@ -479,13 +479,14 @@ public function importCsv(Request $request)
         // Insert ke tabel guru
         // =====================
         $guru = Guru::create([
-            'nama_guru'     => $row[1] ?? null,
-            'nip'           => $row[6] ?? null,
-            'nuptk'         => $row[2] ?? null,
-            'jenis_kelamin' => $jk,
-            'jenis_ptk'     => $row[8] ?? null,
-            'role'          => 'guru_mapel',
-            'status'        => 'aktif',
+    'id_pembelajaran' => null, // sesuaikan kolom CSV
+    'nama_guru'       => $row[1] ?? null,
+    'nip'             => $row[6] ?? null,
+    'nuptk'           => $row[2] ?? null,
+    'jenis_kelamin'   => $jk,
+    'jenis_ptk'       => $row[8] ?? null,
+    'role'            => 'guru_mapel',
+    'status'          => 'aktif',
         ]);
 
         // =========================
@@ -536,8 +537,8 @@ public function importCsv(Request $request)
             'no_kk'                 => $row[45] ?? null,
             'karpeg'                => $row[46] ?? null,
             'karis_karsu'           => $row[47] ?? null,
-            'lintang'               => isset($row[48]) ? str_replace(',', '.', $row[48]) : null,
-            'bujur'                 => isset($row[49]) ? str_replace(',', '.', $row[49]) : null,
+            'lintang'               => null,
+            'bujur'                 => null,
             'nuks'                  => $row[50] ?? null,
         ]);
     }

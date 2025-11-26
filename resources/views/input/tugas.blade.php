@@ -181,33 +181,34 @@
 
             <!-- Filter Dropdown -->
             <div class="grid grid-cols-6 gap-3 mb-6 text-sm">
-                <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
-                    <option value="">Kelas</option>
-                    <option>10 AKL</option>
-                    <option>11 BDP</option>
-                    <option>12 RPL</option>
+                <select name="id_kelas" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+                    <option value="">Pilih Kelas</option>
+                    @foreach ($kelas as $k)
+                        <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
+                    @endforeach
                 </select>
-                <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+
+                <select name="semester" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Semester</option>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                    <option>5</option>
-                    <option>6</option>
+                    <option value="Ganjil">Ganjil</option>
+                    <option value="Genap">Genap</option>
                 </select>
-                <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+
+                <select name="id_tahun" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Tahun Ajaran</option>
-                    <option>2024/2025</option>
-                    <option>2025/2026</option>
+                    @foreach ($ajaran as $a)
+                        <option value="{{ $a->id }}">{{ $a->tahun }}</option>
+                    @endforeach
                 </select>
-                <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+
+                <select name="id_mapel" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Mapel</option>
-                    <option>Pendidikan Agama Islam</option>
-                    <option>Matematika</option>
-                    <option>Bahasa Indonesia</option>
+                    @foreach ($mapel as $m)
+                        <option value="{{ $m->id }}">{{ $m->nama_mapel }}</option>
+                    @endforeach
                 </select>
-                <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+
+                <select name="kategori" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Kategori</option>
                     <option>Tugas Teori</option>
                     <option>Tugas Praktek</option>

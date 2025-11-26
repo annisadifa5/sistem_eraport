@@ -129,7 +129,10 @@ Route::get('/dashboard/data_ekskul/export/pdf', [EkskulController::class, 'expor
 Route::get('/dashboard/data_ekskul/export/csv', [EkskulController::class, 'exportCsv'])->name('dashboard.data_ekskul.export.csv');
 
 
-Route::get('input/tugas', [AdminTugasController::class, 'inputTugas'])->name('input.tugas');
+Route::get('input/tugas', [AdminTugasController::class, 'index'])->name('input.tugas');
+Route::get('input/tugas/filter', [AdminTugasController::class, 'filter'])->name('input.tugas.filter');
+Route::post('input/tugas/simpan', [AdminTugasController::class, 'simpanSemua'])->name('input.tugas.simpan');
+
 Route::get('input/ulangan', [AdminUlanganController::class, 'inputUlangan'])->name('input.ulangan');
 Route::get('input/sts', [AdminSTSController::class, 'inputSTS'])->name('input.sts');
 Route::get('input/sas', [AdminSASController::class, 'inputSAS'])->name('input.sas');
@@ -146,6 +149,8 @@ Route::prefix('guru')->name('guru.')->group(function () {
     Route::get('/input/sas', [InputNilaiGuruController::class, 'inputSAS'])->name('input.sas');
     Route::get('/input/sat', [InputNilaiGuruController::class, 'inputSAT'])->name('input.sat');
 });
+
+
 
 // === Halaman Wali Kelas ===
 // Route::get('wali/dashboard', [DashboardController::class, 'index'])->name('dashboard.wali');

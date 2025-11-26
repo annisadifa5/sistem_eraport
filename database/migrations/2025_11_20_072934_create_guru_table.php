@@ -28,7 +28,9 @@ return new class extends Migration
         // =========================
         Schema::create('detail_guru', function (Blueprint $table) {
             $table->id('id_detail');
-            $table->unsignedBigInteger('id_guru');
+            
+            $table->unsignedBigInteger('id_guru')->nullable();
+            $table->unsignedBigInteger('id_pembelajaran')->nullable();
 
             $table->string('tempat_lahir')->nullable();
             $table->date('tanggal_lahir')->nullable();
@@ -77,6 +79,9 @@ return new class extends Migration
             $table->string('nuks')->nullable();
 
             $table->timestamps();
+
+            // tambahkan index dulu
+            $table->index('id_guru');
 
             // FOREIGN KEY
             $table->foreign('id_guru')

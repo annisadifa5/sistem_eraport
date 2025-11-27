@@ -12,7 +12,7 @@ class User extends Authenticatable
 
     protected $table = 'user'; // nama tabel di database
 
-    protected $primaryKey = 'id'; // primary key custom
+    protected $primaryKey = 'id_user'; // primary key custom
 
     public $incrementing = true;
     protected $keyType = 'int';

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('user', function (Blueprint $table) {
-        $table->boolean('is_walikelas')->default(0)->after('role');
-    });
+        $table->timestamps(); // menambah created_at dan updated_at
+        });
     }
 
     /**
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-       Schema::table('user', function (Blueprint $table) {
-        $table->dropColumn('is_walikelas');
-    });
+         Schema::table('user', function (Blueprint $table) {
+        $table->dropTimestamps();
+        });
     }
 };

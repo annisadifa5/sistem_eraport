@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetailGuru extends Model
 {
-    use HasFactory;
-
     protected $table = 'detail_guru';
-    protected $primaryKey = 'id_detail_guru';
-    public $timestamps = false;
+    protected $primaryKey = 'id_detail';
 
     protected $fillable = [
+        'id_guru',
+        'id_pembelajaran',
         'tempat_lahir',
         'tanggal_lahir',
         'status_kepegawaian',
@@ -58,15 +57,11 @@ class DetailGuru extends Model
         'karis_karsu',
         'lintang',
         'bujur',
-        'nuks',
-        'id_guru'
+        'nuks'
     ];
-
-    /**
-     * Relasi ke tabel guru (Many to One)
-     */
     public function guru()
-    {
-        return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
-    }
+{
+    return $this->belongsTo(Guru::class, 'guru_id', 'id');
 }
+}
+

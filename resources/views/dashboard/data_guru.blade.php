@@ -206,7 +206,7 @@
       <!-- Export & Search -->
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center space-x-2">
-        <form action="{{ route('dashboard.data_guru.import.csv') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('dashboard.data_guru.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <label class="bg-gray-200 text-black px-4 py-1 rounded hover:bg-gray-300 font-bold cursor-pointer">
                 +
@@ -649,8 +649,7 @@
     <template x-if="openDetail">
     <div
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm z-30"
-        x-transition
-    >
+        x-transition>
         <div
         class="bg-white rounded-2xl shadow-2xl w-2/4 p-6 relative overflow-y-auto max-h-[90vh]"
         >
@@ -988,6 +987,14 @@
         </div>
     </div>
     </template>
+    <style>
+    .readonly-field {
+        background-color: #f3f4f6;
+        color: #6b7280;
+        pointer-events: none; /* benar-benar tidak bisa diklik */
+        cursor: default !important;
+    }
+</style>
 
 
     <!-- MODAL HAPUS -->

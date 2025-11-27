@@ -64,23 +64,22 @@ Route::prefix('dashboard')->group(function () {
     // anggota kelas
     Route::get('/data_kelas/{id_kelas}/anggota', [KelasController::class, 'anggota'])->name('dashboard.data_kelas.anggota');
     Route::post('/data_kelas/{id_kelas}/anggota', [KelasController::class, 'tambahAnggota'])->name('dashboard.data_kelas.anggota.tambah');
-    Route::delete('/anggota/{id_anggota}', [KelasController::class, 'hapusAnggota'])->name('dashboard.data_kelas.anggota.hapus');
+    Route::delete('/anggota/{id_siswa}/hapus', [KelasController::class, 'hapusAnggota'])->name('dashboard.data_kelas.anggota.hapus');
 
     //export
     Route::get('data_kelas/export/pdf', [KelasController::class, 'exportPdf'])->name('dashboard.data_kelas.export.pdf');
     Route::get('data_kelas/export/csv', [KelasController::class, 'exportCsv'])->name('dashboard.data_kelas.export.csv');
-    
 });
 
 
 Route::get('dashboard/data_guru', [GuruController::class, 'dataGuru'])->name('dashboard.data_guru');
 Route::post('dashboard/data_guru', [GuruController::class, 'store'])->name('dashboard.data_guru.store');
-Route::get('dashboard/data_guru/{id}', [GuruController::class, 'show'])->name('dashboard.data_guru.show');
-Route::put('dashboard/data_guru/{id}', [GuruController::class, 'update'])->name('dashboard.data_guru.update');
-Route::delete('dashboard/data_guru/{id}', [GuruController::class, 'destroy'])->name('dashboard.data_guru.destroy');
+Route::get('dashboard/data_guru/{id_guru}', [GuruController::class, 'show'])->name('dashboard.data_guru.show');
+Route::put('dashboard/data_guru/{id_guru}', [GuruController::class, 'update'])->name('dashboard.data_guru.update');
+Route::delete('dashboard/data_guru/{id_guru}', [GuruController::class, 'destroy'])->name('dashboard.data_guru.destroy');
 Route::get('dashboard/data_guru/export/pdf', [GuruController::class, 'exportPdf'])->name('dashboard.data_guru.export.pdf');
 Route::get('dashboard/data_guru/export/csv', [GuruController::class, 'exportCsv'])->name('dashboard.data_guru.export.csv');
-Route::post('dashboard/data_guru/import/csv', [GuruController::class, 'importCsv'])->name('dashboard.data_guru.import.csv');
+Route::post('dashboard/data_guru/import/csv', [GuruController::class, 'importCsv'])->name('dashboard.data_guru.import');
 
 
 // === Halaman Data Siswa ===
@@ -90,8 +89,10 @@ Route::get('dashboard/data_siswa/{id_siswa}/edit', [SiswaController::class, 'edi
 Route::get('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'show'])->name('dashboard.data_siswa.show');
 Route::put('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'update'])->name('dashboard.data_siswa.update');
 Route::delete('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'destroy'])->name('dashboard.data_siswa.destroy');
-Route::get('dashboard/data_siswa/export', [SiswaController::class, 'export'])->name('dashboard.data_siswa.export');
-
+Route::get('dashboard/data_siswa/{id_siswa}/export', [SiswaController::class, 'export'])->name('dashboard.data_siswa.export');
+Route::get('dashboard/data_siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('dashboard.data_siswa.export.pdf');
+Route::get('dashboard/data_siswa/export/csv', [SiswaController::class, 'exportCsv'])->name('dashboard.data_siswa.export.csv');
+Route::post('dashboard/data_siswa/import/csv', [SiswaController::class, 'importCsv'])->name('dashboard.data_siswa.import.csv');
 
 
 
@@ -129,10 +130,7 @@ Route::get('/dashboard/data_ekskul/export/pdf', [EkskulController::class, 'expor
 Route::get('/dashboard/data_ekskul/export/csv', [EkskulController::class, 'exportCsv'])->name('dashboard.data_ekskul.export.csv');
 
 
-Route::get('input/tugas', [AdminTugasController::class, 'index'])->name('input.tugas');
-Route::get('input/tugas/filter', [AdminTugasController::class, 'filter'])->name('input.tugas.filter');
-Route::post('input/tugas/simpan', [AdminTugasController::class, 'simpanSemua'])->name('input.tugas.simpan');
-
+Route::get('input/tugas', [AdminTugasController::class, 'inputTugas'])->name('input.tugas');
 Route::get('input/ulangan', [AdminUlanganController::class, 'inputUlangan'])->name('input.ulangan');
 Route::get('input/sts', [AdminSTSController::class, 'inputSTS'])->name('input.sts');
 Route::get('input/sas', [AdminSASController::class, 'inputSAS'])->name('input.sas');
@@ -149,8 +147,6 @@ Route::prefix('guru')->name('guru.')->group(function () {
     Route::get('/input/sas', [InputNilaiGuruController::class, 'inputSAS'])->name('input.sas');
     Route::get('/input/sat', [InputNilaiGuruController::class, 'inputSAT'])->name('input.sat');
 });
-
-
 
 // === Halaman Wali Kelas ===
 // Route::get('wali/dashboard', [DashboardController::class, 'index'])->name('dashboard.wali');

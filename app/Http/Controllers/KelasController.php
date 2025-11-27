@@ -69,12 +69,23 @@ class KelasController extends Controller
         return redirect()->back()->with('success', 'Data kelas berhasil dihapus.');
     }
 
-    //Tampilkan anggota kelas tertentu
     public function anggota($id_kelas)
     {
-        $kelas = Kelas::with('anggota')->findOrFail($id_kelas);
-        return view('dashboard.anggota_kelas', compact('kelas'));
+        $kelas = Kelas::findOrFail($id_kelas);
+
+        $anggota = Siswa::select(
+                'siswa.nama_siswa',
+                'siswa.nisn',
+                'detail_siswa.id_kelas'
+            )
+            ->join('detail_siswa', 'detail_siswa.id_siswa', '=', 'siswa.id_siswa')
+            ->where('detail_siswa.id_kelas', $id_kelas)
+            ->get();
+
+        return view('dashboard.anggota_kelas', compact('kelas', 'anggota'));
     }
+
+
 
     // Tambah anggota ke kelas
     public function tambahAnggota(Request $request, $id_kelas)
@@ -99,19 +110,16 @@ class KelasController extends Controller
     }
 
     // Hapus anggota tertentu
-    public function hapusAnggota($id_anggota)
+    public function hapusAnggota($id_siswa)
     {
-        $anggota = AnggotaKelas::findOrFail($id_anggota);
-        $id_kelas = $anggota->id_kelas;
-        $anggota->delete();
-
-        // Update jumlah siswa
-        Kelas::find($id_kelas)->update([
-            'jumlah_siswa' => AnggotaKelas::where('id_kelas', $id_kelas)->count()
+        DetailSiswa::where('id_siswa', $id_siswa)->update([
+            'id_kelas' => null
         ]);
 
-        return redirect()->back()->with('success', 'Anggota berhasil dihapus.');
+        return back()->with('success', 'Anggota dihapus dari kelas.');
     }
+
+
 
     /**
      * 🔹 Export semua data kelas ke PDF

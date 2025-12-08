@@ -8,12 +8,12 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('nilai_tugas', function (Blueprint $table) {
+        Schema::create('tugas', function (Blueprint $table) {
             $table->id();
 
             // Relasi
-            $table->unsignedBigInteger('siswa_id');
-            $table->unsignedBigInteger('mapel_id');
+            $table->unsignedBigInteger('id_siswa');
+            $table->unsignedBigInteger('id_mapel');
 
             // Filter tambahan
             $table->string('kategori'); // contoh: Tugas 1, Tugas 2, Ulangan Harian
@@ -30,13 +30,13 @@ return new class extends Migration
             $table->timestamps();
 
             // Foreign key
-            $table->foreign('siswa_id')->references('id')->on('siswa')->onDelete('cascade');
-            $table->foreign('mapel_id')->references('id')->on('mapels')->onDelete('cascade');
+            $table->foreign('id_siswa')->references('id')->on('siswa')->onDelete('cascade');
+            $table->foreign('id_mapel')->references('id')->on('mapel')->onDelete('cascade');
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('nilai_tugas');
+        Schema::dropIfExists('tugas');
     }
 };

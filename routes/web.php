@@ -11,7 +11,7 @@ MapelController,
 PembelajaranController,
 EkskulController,
 InfoSekolahController};
-use App\Http\Controllers\{AdminTugasController,
+use App\Http\Controllers\{AdminTugasController,   
 AdminUlanganController,
 AdminSTSController,
 AdminSASController,
@@ -130,6 +130,15 @@ Route::delete('dashboard/ekskul_siswa/delete/{id_ekskul_siswa}', [EkskulControll
 Route::get('/dashboard/data_ekskul/export/pdf', [EkskulController::class, 'exportPdf'])->name('dashboard.data_ekskul.export.pdf');
 Route::get('/dashboard/data_ekskul/export/csv', [EkskulController::class, 'exportCsv'])->name('dashboard.data_ekskul.export.csv');
 
+//admin tugas
+Route::get('input/tugas', [AdminTugasController::class, 'index'])->name('input.tugas');
+Route::get('input/tugas/filter', [AdminTugasController::class, 'filter'])->name('input.tugas.filter');
+Route::post('input/tugas/simpan', [AdminTugasController::class, 'simpanSemua'])->name('input.tugas.simpan');
+// Export Tugas
+Route::get('/input/tugas/export/pdf', [AdminTugasController::class, 'exportPdf'])
+    ->name('input.tugas.export.pdf');
+Route::get('/input/tugas/export/csv', [AdminTugasController::class, 'exportCsv'])
+    ->name('input.tugas.export.csv');
 
 Route::get('input/tugas', [AdminTugasController::class, 'inputTugas'])->name('input.tugas');
 

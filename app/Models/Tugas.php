@@ -60,4 +60,9 @@ class Tugas extends Model
     {
         return $this->belongsTo(User::class, 'id_user');
     }
+
+    public function siswa()
+{
+    return $this->belongsTo(Siswa::class, 'id_siswa');
+}
 }

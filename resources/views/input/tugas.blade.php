@@ -48,10 +48,12 @@
                     <option>5</option>
                     <option>6</option>
                 </select>
-                <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
+
+                <select name="tahun_ajaran" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Tahun Ajaran</option>
-                    <option>2024/2025</option>
-                    <option>2025/2026</option>
+                    @foreach ($ajaran as $a)
+                        <option value="{{ $a }}">{{ $a }}</option>
+                    @endforeach
                 </select>
                 <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Mapel</option>
@@ -61,8 +63,8 @@
                 </select>
                 <select class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 text-gray-700">
                     <option value="">Kategori</option>
-                    <option>Tugas Teori</option>
-                    <option>Tugas Praktek</option>
+                    <option>Teori</option>
+                    <option>Praktik</option>
                 </select>
                 <div class="relative">
                     <input type="date" class="border rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-400 text-gray-700">
@@ -73,8 +75,14 @@
             <!-- Export & Search -->
             <div class="flex justify-between items-center mb-4">
                 <div class="space-x-2">
-                    <button class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">PDF</button>
-                    <button class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">CSV</button>
+<a href="{{ route('input.tugas.export.pdf') }}">
+    <button class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">PDF</button>
+</a>
+
+<a href="{{ route('input.tugas.export.csv') }}">
+    <button class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">CSV</button>
+</a>
+
                 </div>
                 <input type="text" placeholder="Search..." class="border px-3 py-1 rounded focus:ring-1 focus:ring-blue-400 outline-none">
             </div>

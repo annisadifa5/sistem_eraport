@@ -48,14 +48,44 @@
             <div class="flex justify-between items-center mb-4">
             <!-- Tombol di kiri -->
             <div class="flex items-center space-x-2">
-                <button class="bg-gray-200 text-black px-4 py-1 rounded hover:bg-gray-300 font-bold">+</button>
-                <button class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">PDF</button>
-                <button class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300">CSV</button>
+            <form id="csvImportForm"
+                    action="{{ route('dashboard.data_siswa.import.csv') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="inline">
+
+                    @csrf
+
+                    <label for="csvInput"
+                        class="bg-gray-200 text-black px-4 py-1 rounded hover:bg-gray-300 font-bold cursor-pointer">
+                        +
+                    </label>
+
+                    <input type="file"
+                        name="file"
+                        id="csvInput"
+                        accept=".csv"
+                        class="hidden">
+                </form>
+
+                <script>
+                document.getElementById('csvInput').addEventListener('change', function() {
+                    document.getElementById('csvImportForm').submit();
+                });
+                </script>
+
+
+
+                <a href="{{ route('dashboard.data_siswa.export.pdf') }}" 
+                class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block">PDF</a>
+                <a href="{{ route('dashboard.data_siswa.export.csv') }}" 
+                class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block">CSV</a>
             </div>
 
             <!-- Search di kanan -->
             <input
                 type="text"
+                name="search"
                 placeholder="Search..."
                 class="border px-3 py-1 rounded focus:ring-1 focus:ring-blue-400 outline-none"/>
             </div>
@@ -78,7 +108,7 @@
                     <tbody>
                         @foreach ($siswa as $index => $s)
                         <tr class="border-t hover:bg-gray-50" x-data="{ openDropdown:false }">
-                            <td class="px-4 py-2">{{ $index + 1 }}</td>
+                            <td class="px-4 py-2">{{ $siswa->firstItem() + $index }}</td>
                             <td class="px-4 py-2">{{ $s->nama_siswa }}</td>
                             <td class="px-4 py-2">{{ $s->nipd }}</td>
                             <td class="px-4 py-2">{{ $s->nisn }}</td>
@@ -119,7 +149,7 @@
                                             </button>
                                             <!-- UNDUH -->
                                             <button 
-                                                @click="openDropdown=false; openDownload=true"
+                                                @click="openDropdown=false; window.location.href='{{ route('dashboard.data_siswa.export', $s->id_siswa) }}'"
                                                 class="w-full px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
                                                 <i class="fa-solid fa-download text-green-500 text-xs"></i> Unduh
                                             </button>
@@ -138,6 +168,9 @@
                         @endforeach
                     </tbody>
                 </table>
+                <div class="mt-4">
+                    {{ $siswa->links() }}
+                </div>
             </div>
         </div>
 
@@ -653,41 +686,46 @@
             <!-- ======== END MODAL ======== -->
 
 
-            <!-- ======== MODAL DETAIL ======== -->
-            <div x-show="openDetail" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm z-30" x-transition>
+           <!-- ======== MODAL DETAIL ======== -->
+            <div x-show="openDetail" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm z-30">
                 <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-6 relative overflow-y-auto max-h-[90vh]">
-                <button @click="openDetail = false" class="absolute top-3 right-3 text-gray-500 hover:text-red-600">
-                <i class="fa-solid fa-xmark text-2xl"></i>
-                </button>
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-circle-info text-blue-600"></i> Detail Siswa
-                </h2>
 
-                <form class="flex flex-col gap-4 text-sm">
-                <!-- Loop Section -->
-                <template x-for="section in detailSections" :key="section.title">
-                    <div>
-                        <div class="border-t pt-3 mb-2">
-                            <h3 class="font-bold text-gray-700 mb-2 text-lg" x-text="section.title"></h3>
-                        </div>
+                    <button @click="openDetail = false" class="absolute top-3 right-3 text-gray-500 hover:text-red-600">
+                        <i class="fa-solid fa-xmark text-2xl"></i>
+                    </button>
 
-                        <!-- Loop Field -->
-                        <template x-for="field in section.fields" :key="field.label">
-                            <div class="mb-2">
-                                <label class="block mb-1 text-gray-700 font-medium" x-text="field.label"></label>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-blue-600"></i> Detail Siswa
+                    </h2>
 
-                                <!-- Auto binding field -->
-                                <input type="text" readonly
-                                    class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600"
-                                    :value="getFieldValue(field.key)">
+                    <form class="flex flex-col gap-4 text-sm">
+
+                        <!-- Loop Section -->
+                        <template x-for="section in detailSections" :key="section.title">
+                            <div>
+
+                                <div class="border-t pt-3 mb-2">
+                                    <h3 class="font-bold text-gray-700 mb-2 text-lg" x-text="section.title"></h3>
+                                </div>
+
+                                <!-- Loop Field -->
+                                <template x-for="field in section.fields" :key="field.label">
+                                    <div class="mb-2">
+                                        <label class="block mb-1 text-gray-700 font-medium" x-text="field.label"></label>
+
+                                        <input type="text" readonly
+                                            class="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600"
+                                            :value="getFieldValue(field.key)">
+                                    </div>
+                                </template>
+
                             </div>
                         </template>
 
-                    </div>
                     </form>
-                    </template>
+
                 </div>
-                </div>
+            </div>
 
             <!-- 🟩 Modal Hapus Data -->
             <div x-show="openDelete"
@@ -704,10 +742,15 @@
                         class="bg-gray-200 text-gray-700 px-4 py-1 rounded font-medium hover:bg-gray-300">
                         Batal
                     </button>
-                    <button @click="openDelete = false"
+                    <form method="POST" action="{{ route('dashboard.data_siswa.destroy', $s->id_siswa) }}">
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit"
                         class="bg-red-600 text-white px-4 py-1 rounded font-medium hover:bg-red-700">
                         Hapus
                     </button>
+                </form>
                 </div>
                 </div>
                 </div>
@@ -730,10 +773,10 @@
                                     Batal
                                 </button>
                                 <button 
-                                    @click="downloadExcel()"
+                                    @click="openDownload=true; exportUrl='{{ route('dashboard.data_siswa.export', $s->id_siswa) }}'"
                                     class="bg-blue-600 text-white px-4 py-1 rounded font-medium hover:bg-blue-700 flex items-center gap-1">
                                     <i class="fa-solid fa-download text-sm"></i> Unduh
-                                </button>
+                                </>
                             </div>
                         </div>
                     </div>
@@ -744,13 +787,15 @@
                     return {
                         sidebarOpen: true,
                         dataSekolahOpen: true,
-                        inputNilaiOpen: false,   // ➜ DITAMBAHKAN
+                        inputNilaiOpen: false,   
+
                         openTambah: false,
                         openEdit: false,
                         openDetail: false,
                         openDelete: false,
                         openDownload: false,
 
+                        deleteUrl: "",
                         detailData: {},
                         detailSections: [],      // ➜ DITAMBAHKAN
 
@@ -843,25 +888,218 @@
                             this.formData = { ...data };
                         },
 
-                        async editData(url) {
-                                    this.openEdit = true;
+                       async editData(url) {
+                            this.openEdit = true;
 
-                                    try {
-                                        let res = await fetch(url);
-                                        let data = await res.json();
+                            try {
+                                let res = await fetch(url);
+                                let data = await res.json();
 
-                                        this.formData = data;   // isi data ke semua x-model
-                                    } catch (e) {
-                                        console.error("Gagal mengambil data siswa:", e);
-                                    }
-                                },
+                                // Pecah data siswa & detail
+                                const siswa = data;
+                                const detail = data.detail ?? {};
 
-                        showDetail(url) {
-                            this.openDetail = true;
-                            fetch(url)
-                                .then(r => r.json())
-                                .then(d => this.detailData = d);
+                                // Template form kosong
+                                const defaultForm = {
+                                    id_siswa: "",
+                                    nama_siswa: "",
+                                    nipd: "",
+                                    nisn: "",
+                                    nik: "",
+                                    tempat_lahir: "",
+                                    tanggal_lahir: "",
+                                    jenis_kelamin: "",
+                                    agama: "",
+                                    alamat: "",
+                                    rt: "",
+                                    rw: "",
+                                    dusun: "",
+                                    jenis_tinggal: "",
+                                    alat_transportasi: "",
+                                    no_telepon: "",
+                                    no_hp: "",
+                                    email: "",
+                                    skhun: "",
+                                    penerima_kps: "",
+                                    no_kps: "",
+                                    rombel: "",
+                                    no_peserta_ujian_nasional: "",
+                                    no_seri_ijazah: "",
+                                    penerima_kip: "",
+                                    no_kip: "",
+                                    nama_kip: "",
+                                    no_kks: "",
+                                    no_regis_akta_lahir: "",
+                                    bank: "",
+                                    no_rek_bank: "",
+                                    rek_atas_nama: "",
+                                    layak_pip_usulan: "",
+                                    alasan_layak_pip: "",
+                                    kebutuhan_khusus: "",
+                                    asal_sekolah: "",
+                                    anak_ke_berapa: "",
+                                    lintang: "",
+                                    bujur: "",
+                                    no_kk: "",
+                                    bb: "",
+                                    tb: "",
+                                    lingkar_kepala: "",
+                                    jml_saudara_kandung: "",
+                                    jarak_rumah: "",
+                                    ekskul: "",
+
+                                    // AYAH
+                                    nama_ayah: "",
+                                    tahun_lahir_ayah: "",
+                                    jenjang_pendidikan_ayah: "",
+                                    pekerjaan_ayah: "",
+                                    penghasilan_ayah: "",
+                                    nik_ayah: "",
+
+                                    // IBU
+                                    nama_ibu: "",
+                                    tahun_lahir_ibu: "",
+                                    jenjang_pendidikan_ibu: "",
+                                    pekerjaan_ibu: "",
+                                    penghasilan_ibu: "",
+                                    nik_ibu: "",
+
+                                    // WALI
+                                    nama_wali: "",
+                                    tahun_lahir_wali: "",
+                                    jenjang_pendidikan_wali: "",
+                                    pekerjaan_wali: "",
+                                    penghasilan_wali: "",
+                                    nik_wali: "",
+                                };
+
+                                // Gabungkan siswa + detail
+                                this.formData = {
+                                    ...defaultForm,      // isi default
+                                    ...siswa,            // isi data siswa
+                                    ...detail,           // isi data detail siswa
+                                    ekskul: siswa.id_ekskul ?? "" // jika ekskul beda nama field
+                                };
+
+                            } catch (err) {
+                                console.error("Gagal load data edit:", err);
+                            }
                         },
+
+                        async showDetail(url) {
+                        try {
+                            // fetch dulu, jangan buka modal dulu
+                            let res = await fetch(url);
+                            let data = await res.json();
+
+                            // gabungkan siswa + detail (aman jika detail null)
+                            this.detailData = {
+                                ...data,
+                                ...(data.detail ?? {})
+                            };
+
+                            // susun detailSections sebagai ARRAY — contoh sesuai struktur modalmu
+                            this.detailSections = [
+                                {
+                                    title: 'Data Siswa',
+                                    fields: [
+                                        { label: 'Nama Siswa', key: 'nama_siswa' },
+                                        { label: 'NIPD', key: 'nipd' },
+                                        { label: 'NISN', key: 'nisn' },
+                                        { label: 'NIK', key: 'nik' },
+                                        { label: 'Tempat Lahir', key: 'tempat_lahir' },
+                                        { label: 'Tanggal Lahir', key: 'tanggal_lahir' },
+                                        { label: 'Jenis Kelamin', key: 'jenis_kelamin' },
+                                        { label: 'Agama', key: 'agama' },
+                                        { label: 'Alamat', key: 'alamat' },
+                                        { label: 'RT', key: 'rt' },
+                                        { label: 'RW', key: 'rw' },
+                                        { label: 'Dusun', key: 'dusun' },
+                                        { label: 'Jenis Tinggal', key: 'jenis_tinggal' },
+                                        { label: 'Alat Transportasi', key: 'alat_transportasi' },
+                                        { label: 'Telepon', key: 'telepon' }, // sesuaikan key jika berbeda
+                                        { label: 'No HP', key: 'no_hp' },
+                                        { label: 'Email', key: 'email' },
+                                        { label: 'Penerima KPS', key: 'penerima_kps' },
+                                        { label: 'No KPS', key: 'no_kps' },
+                                        { label: 'Rombel', key: 'tingkat' },
+                                        { label: 'Kelas (id)', key: 'id_kelas' },
+                                        { label: 'No Peserta UN', key: 'no_peserta_ujian_nasional' },
+                                        { label: 'No Seri Ijazah', key: 'no_seri_ijazah' },
+                                        { label: 'Penerima KIP', key: 'penerima_kip' },
+                                        { label: 'No KIP', key: 'no_kip' },
+                                        { label: 'Nama KIP', key: 'nama_kip' },
+                                        { label: 'No KKS', key: 'no_kks' },
+                                        { label: 'No Regis Akta Lahir', key: 'no_regis_akta_lahir' },
+                                        { label: 'Bank', key: 'bank' },
+                                        { label: 'No Rek Bank', key: 'no_rek_bank' },
+                                        { label: 'Rek Atas Nama', key: 'rek_atas_nama' },
+                                        { label: 'Layak PIP', key: 'layak_pip_usulan' },
+                                        { label: 'Alasan Layak PIP', key: 'alasan_layak_pip' },
+                                        { label: 'Kebutuhan Khusus', key: 'kebutuhan_khusus' },
+                                        { label: 'Asal Sekolah', key: 'asal_sekolah' },
+                                        { label: 'Anak Ke', key: 'anak_ke_berapa' },
+                                        { label: 'Lintang', key: 'lintang' },
+                                        { label: 'Bujur', key: 'bujur' },
+                                        { label: 'No KK', key: 'no_kk' },
+                                        { label: 'Berat Badan', key: 'bb' },
+                                        { label: 'Tinggi Badan', key: 'tb' },
+                                        { label: 'Lingkar Kepala', key: 'lingkar_kepala' },
+                                        { label: 'Jumlah Saudara', key: 'jml_saudara_kandung' },
+                                        { label: 'Jarak Rumah', key: 'jarak_rumah' },
+                                        { label: 'Ekskul (id)', key: 'id_ekskul' },
+                                    ]
+                                },
+                                {
+                                    title: 'Data Ayah',
+                                    fields: [
+                                        { label: 'Nama Ayah', key: 'nama_ayah' },
+                                        { label: 'Tahun Lahir Ayah', key: 'tahun_lahir_ayah' },
+                                        { label: 'Pendidikan Ayah', key: 'jenjang_pendidikan_ayah' },
+                                        { label: 'Pekerjaan Ayah', key: 'pekerjaan_ayah' },
+                                        { label: 'Penghasilan Ayah', key: 'penghasilan_ayah' },
+                                        { label: 'NIK Ayah', key: 'nik_ayah' },
+                                    ]
+                                },
+                                {
+                                    title: 'Data Ibu',
+                                    fields: [
+                                        { label: 'Nama Ibu', key: 'nama_ibu' },
+                                        { label: 'Tahun Lahir Ibu', key: 'tahun_lahir_ibu' },
+                                        { label: 'Pendidikan Ibu', key: 'jenjang_pendidikan_ibu' },
+                                        { label: 'Pekerjaan Ibu', key: 'pekerjaan_ibu' },
+                                        { label: 'Penghasilan Ibu', key: 'penghasilan_ibu' },
+                                        { label: 'NIK Ibu', key: 'nik_ibu' },
+                                    ]
+                                },
+                                {
+                                    title: 'Data Wali',
+                                    fields: [
+                                        { label: 'Nama Wali', key: 'nama_wali' },
+                                        { label: 'Tahun Lahir Wali', key: 'tahun_lahir_wali' },
+                                        { label: 'Pendidikan Wali', key: 'jenjang_pendidikan_wali' },
+                                        { label: 'Pekerjaan Wali', key: 'pekerjaan_wali' },
+                                        { label: 'Penghasilan Wali', key: 'penghasilan_wali' },
+                                        { label: 'NIK Wali', key: 'nik_wali' },
+                                    ]
+                                }
+                            ];
+
+                            // setelah data dan sections siap, buka modal
+                            this.openDetail = true;
+
+                        } catch (err) {
+                            console.error("Gagal load detail:", err);
+                            this.detailData = {};
+                            this.detailSections = [];
+                            // jangan buka modal jika gagal
+                            this.openDetail = false;
+                        }
+                    },
+
+                        getFieldValue(key) {
+                        return this.detailData[key] ?? "-";
+                },
 
                         confirmDelete(url) {
                             this.deleteUrl = url;
@@ -876,7 +1114,7 @@
                         },
 
                         downloadExcel() {
-                            window.location.href = "{{ route('dashboard.data_siswa.export') }}";
+                            window.location.href = this.exportUrl;
                             this.openDownload = false;
                         }
                     }

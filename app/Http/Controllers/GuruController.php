@@ -391,50 +391,50 @@ class GuruController extends Controller
         }
     }
 
-            // PDF CSV
-            public function exportPdf()
-        {
-            $guru = Guru::all();
+        // PDF CSV
+    public function exportPdf()
+    {
+        $guru = Guru::all();
 
-            $pdf = Pdf::loadView('exports.data_guru_pdf', [
-                'guru' => $guru
-            ]);
+        $pdf = Pdf::loadView('exports.data_guru_pdf', [
+            'guru' => $guru
+        ]);
 
-            return $pdf->download('data-guru.pdf');
-        }
+        return $pdf->download('data-guru.pdf');
+    }
 
-        public function exportCsv()
-        {
-            $guru = Guru::all();
+    public function exportCsv()
+    {
+        $guru = Guru::all();
 
-            return response()->streamDownload(function() use ($guru) {
+        return response()->streamDownload(function() use ($guru) {
 
-                $file = fopen('php://output', 'w');
+            $file = fopen('php://output', 'w');
 
-                // HEADER CSV
-                fputcsv($file, ['No','Nama Guru','NIP','NUPTK','Jenis Kelamin','Jenis PTK','Role','Status']);
+            // HEADER CSV
+            fputcsv($file, ['No','Nama Guru','NIP','NUPTK','Jenis Kelamin','Jenis PTK','Role','Status']);
 
-                $no = 1;
+            $no = 1;
 
-                foreach ($guru as $g) {
-                    fputcsv($file, [
-                        $no++,
-                        $g->nama_guru,
-                        $g->nip,
-                        $g->nuptk,
-                        $g->jenis_kelamin,
-                        $g->jenis_ptk,
-                        $g->role,
-                        $g->status,
-                    ]);
-                }
+            foreach ($guru as $g) {
+                fputcsv($file, [
+                    $no++,
+                    $g->nama_guru,
+                    $g->nip,
+                    $g->nuptk,
+                    $g->jenis_kelamin,
+                    $g->jenis_ptk,
+                    $g->role,
+                    $g->status,
+                ]);
+            }
 
-                fclose($file);
+            fclose($file);
 
-            }, 'data-guru.csv', [
-                'Content-Type' => 'text/csv'
-            ]);
-        }
+        }, 'data-guru.csv', [
+            'Content-Type' => 'text/csv'
+        ]);
+    }
 
 
 public function importCsv(Request $request)
@@ -537,14 +537,15 @@ public function importCsv(Request $request)
             'no_kk'                 => $row[45] ?? null,
             'karpeg'                => $row[46] ?? null,
             'karis_karsu'           => $row[47] ?? null,
-            'lintang'               => null,
-            'bujur'                 => null,
+            'lintang'               => $row[48] ?? null,
+            'bujur'                 => $row[49] ?? null,
             'nuks'                  => $row[50] ?? null,
         ]);
     }
 
     return back()->with('success', 'Data CSV berhasil diimport');
 }
+
 
 
 }

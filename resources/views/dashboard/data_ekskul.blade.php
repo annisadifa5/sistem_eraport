@@ -92,7 +92,7 @@
                             <option selected disabled>Jadwal</option>
                             @foreach ($ekskul as $e)
                             <option value="{{ $e->jadwal_ekskul }}">
-                                {{ \Carbon\Carbon::parse($e->jadwal_ekskul)->translatedFormat('l, H:i') }}
+                                {{ $e->jadwal_ekskul }}
                             </option>
                         @endforeach
                         </select>
@@ -232,7 +232,7 @@
 
                                                   <form 
                                                       method="POST" 
-                                                      action="{{ route('dashboard.dta_ekskul.updateEkskul', $e->id_ekskul) }}"
+                                                      action="{{ route('dashboard.data_ekskul.updateEkskul', $e->id_ekskul) }}"
                                                       class="space-y-4"
                                                   >
                                                       @csrf
@@ -271,7 +271,7 @@
                                                           <input 
                                                               type="datetime-local"
                                                               name="jadwal_ekskul"
-                                                              value="{{ \Carbon\Carbon::parse($e->jadwal_ekskul)->format('Y-m-d\TH:i') }}"
+                                                              value="{{ $e->jadwal_ekskul }}"
                                                               class="w-full border p-2 rounded"
                                                           >
                                                       </div>

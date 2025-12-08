@@ -21,31 +21,23 @@ class Guru extends Model
         'jenis_ptk',
         'role',
         'status',
-        'id_pembelajaran',
     ];
 
+    public function detailGuru()
+    {
+        return $this->hasOne(DetailGuru::class, 'id_guru', 'id_guru');
+    }
+
+    public function pembelajaran()
+    {
+        return $this->hasMany(Pembelajaran::class, 'id_guru', 'id_guru');
+    }
     /**
      * Relasi ke tabel ekskul (One to Many)
      */
     public function ekskul()
     {
         return $this->hasMany(Ekskul::class, 'id_guru', 'id_guru');
-    }
-
-    /**
-     * Relasi ke tabel detail_guru (One to One)
-     */
-    public function detailGuru()
-    {
-        return $this->hasOne(DetailGuru::class, 'id_guru', 'id_guru');
-    }
-
-    /**
-     * Relasi ke tabel pembelajaran (Many to One)
-     */
-    public function pembelajaran()
-    {
-        return $this->belongsTo(Pembelajaran::class, 'id_pembelajaran', 'id_pembelajaran');
     }
 
     /**

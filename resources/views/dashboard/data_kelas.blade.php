@@ -210,7 +210,7 @@
                             <td class="py-2 px-4">{{ $k->tingkat }}</td>
                             <td class="py-2 px-4">{{ $k->jurusan }}</td>
                             <td class="py-2 px-4">{{ $k->wali_kelas }}</td>
-                            <td class="py-2 px-4">{{ $k->jumlah_siswa }}</td>
+                            <td class="py-2 px-4">{{ \App\Models\Siswa::where('id_kelas', $k->id_kelas)->count() }}</td>
                             <td class="py-2 px-4 text-center space-x-2">
                             <!-- Dropdown Aksi -->
                             <div class="relative inline-block text-left" 
@@ -322,7 +322,7 @@
                                     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50"
                                     @click.self="modalOpen=false">
 
-                                    <div class="bg-white w-3/4 md:w-1/2 rounded-2xl shadow-xl p-6 relative">
+                                    <div class="bg-white w-3/4 md:w-1/2 rounded-2xl shadow-xl p-6 relative max-h-[80vh] overflow-y-auto">
                                         <!-- Header Modal -->
                                         <div class="flex justify-between items-center mb-4 border-b pb-2">
                                             <h2 class="text-lg font-semibold flex items-center gap-2">
@@ -353,18 +353,18 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @php
-                                                        $anggota_list = $k->anggotaKelas ?? collect([]);
-                                                    @endphp
+                                                @php
+                                                    $anggota_list = \App\Models\Siswa::where('id_kelas', $k->id_kelas)->get();
+                                                @endphp
 
-                                                    @forelse ($anggota_list as $index => $angg)
+                                                @forelse ($anggota_list as $index => $angg)
                                                     <tr class="border-b hover:bg-gray-50">
                                                         <td class="py-2 px-3">{{ $index + 1 }}</td>
-                                                        <td class="py-2 px-3">{{ $angg->nama }}</td>
+                                                        <td class="py-2 px-3">{{ $angg->nama_siswa }}</td>
                                                         <td class="py-2 px-3">{{ $angg->nisn }}</td>
                                                         <td class="py-2 px-3">{{ $k->nama_kelas }}</td>
                                                         <td class="py-2 px-3 text-center">
-                                                            <form action="{{ route('dashboard.anggota.hapus', $angg->id) }}" 
+                                                            <form action="{{ route('dashboard.data_kelas.anggota.hapus', $angg->id_siswa) }}" 
                                                                 method="POST" 
                                                                 class="inline"
                                                                 onsubmit="return confirm('Yakin ingin menghapus anggota ini?')">
@@ -376,14 +376,15 @@
                                                             </form>
                                                         </td>
                                                     </tr>
-                                                    @empty
+                                                @empty
                                                     <tr>
                                                         <td colspan="5" class="py-4 px-3 text-center text-gray-500">
                                                             Belum ada anggota di kelas ini.
                                                         </td>
                                                     </tr>
-                                                    @endforelse
-                                                </tbody>
+                                                @endforelse
+                                            </tbody>
+
                                             </table>
                                         </div>
 
@@ -397,11 +398,9 @@
                                     </div>
                                 </div>
                             </div>
-
                         </td>
-
                         </tr>
-                        @endforeach
+                         @endforeach
                     </tbody>
                 </table>
             </div>

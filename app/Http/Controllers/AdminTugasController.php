@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+<<<<<<< HEAD
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Siswa;
@@ -9,14 +10,17 @@ use App\Models\NilaiTugas;
 use App\Models\TahunAjaran;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Tugas;
+=======
+>>>>>>> 10de75b1645ab26b2c7f9a3ca811660a3d28312e
 use Illuminate\Http\Request;
 
 
 class AdminTugasController extends Controller
 {
-    // Tahun ajaran otomatis
-    private function getCurrentTahunAjaran()
+    // Halaman Input Tugas
+    public function inputTugas()
     {
+<<<<<<< HEAD
         $tahun = date('Y');
         return $tahun . '/' . ($tahun + 1);
     }
@@ -131,4 +135,8 @@ public function exportCsv()
 }
 
  
+=======
+        return view('input.tugas');
+    }
+>>>>>>> 10de75b1645ab26b2c7f9a3ca811660a3d28312e
 }

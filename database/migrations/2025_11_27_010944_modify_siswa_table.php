@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user', function (Blueprint $table) {
-        $table->boolean('is_walikelas')->default(0)->after('role');
-    });
+        Schema::table('siswa', function (Blueprint $table) {
+            //
+        });
     }
 
     /**
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-       Schema::table('user', function (Blueprint $table) {
-        $table->dropColumn('is_walikelas');
-    });
+        Schema::table('siswa', function (Blueprint $table) {
+            //
+        });
     }
 };

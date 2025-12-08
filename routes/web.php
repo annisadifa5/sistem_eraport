@@ -16,6 +16,7 @@ AdminUlanganController,
 AdminSTSController,
 AdminSASController,
 AdminSATController,
+AdminRaporController,
 AdminCetakController};
 use App\Http\Controllers\InputNilaiGuruController;
 use App\Http\Controllers\InputNilaiWaliController;
@@ -131,10 +132,22 @@ Route::get('/dashboard/data_ekskul/export/csv', [EkskulController::class, 'expor
 
 
 Route::get('input/tugas', [AdminTugasController::class, 'inputTugas'])->name('input.tugas');
+
 Route::get('input/ulangan', [AdminUlanganController::class, 'inputUlangan'])->name('input.ulangan');
+Route::get('input/ulangan/simpan', [AdminUlanganController::class, 'simpanUlangan'])->name('input.ulangan.simpan');
+Route::post('/input/ulangan/simpan', [AdminUlanganController::class, 'simpanUlangan'])->name('input.ulangan.simpan');
+
+
+
 Route::get('input/sts', [AdminSTSController::class, 'inputSTS'])->name('input.sts');
 Route::get('input/sas', [AdminSASController::class, 'inputSAS'])->name('input.sas');
 Route::get('input/sat', [AdminSATController::class, 'inputSAT'])->name('input.sat');
+
+Route::get('input/rapor', [AdminRaporController::class, 'inputRapor'])->name('input.rapor');
+Route::post('/input/rapor/simpan', [AdminRaporController::class, 'simpanRapor'])->name('input.rapor.simpan');
+Route::get('/get-siswa/{id_kelas}', [AdminRaporController::class, 'getSiswa']);
+
+
 Route::get('input/cetak', [AdminCetakController::class, 'cetakNilai'])->name('input.cetak');
 
 // === Halaman Guru ===

@@ -13,13 +13,13 @@ return new class extends Migration
     {
         if (!Schema::hasTable('kelas')) {
         Schema::create('kelas', function (Blueprint $table) {
-            $table->id('id_kelas');
+            $table->integer('id_kelas');
             $table->string('nama_kelas', 100);
             $table->string('tingkat', 50);
             $table->string('jurusan', 100)->nullable();
             $table->string('wali_kelas', 100)->nullable();
             $table->integer('jumlah_siswa')->default(0);
-             $table->integer('id_guru')->nullable()->change();
+             $table->integer('id_guru')->nullable();
             $table->timestamps();
         });
     }

@@ -32,6 +32,12 @@ class Siswa extends Model
     {
         return $this->belongsTo(Ekskul::class, 'id_ekskul');
     }
+
+    public function ulangan()
+    {
+        return $this->hasMany(UlanganHarian::class, 'id_siswa', 'id_siswa');
+    }
+
 }
 
 

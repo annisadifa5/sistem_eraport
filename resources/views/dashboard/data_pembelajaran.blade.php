@@ -77,7 +77,7 @@
                                             focus:outline-none focus:ring-2 focus:ring-blue-400">
                                         <option value="">Pilih Mata Pelajaran</option>
                                          @foreach($mapel as $m)
-                                        <option value="{{ $m->id }}">{{ $m->nama_mapel }}</option>
+                                        <option value="{{ $m->id_mapel }}">{{ $m->nama_mapel }}</option>
                                     @endforeach
                                     </select>
                                 </div>
@@ -90,7 +90,7 @@
                                             focus:outline-none focus:ring-2 focus:ring-blue-400">
                                             <option value="">Pilih Kelas</option>
                                             @foreach($kelas as $k)
-                                            <option value="{{ $k->id }}">
+                                            <option value="{{ $k->id_kelas }}">
                                                 {{ $k->tingkat }} {{ $k->nama_kelas }} - {{ $k->jurusan }}
                                             </option>
                                     @endforeach
@@ -105,7 +105,7 @@
                                             focus:outline-none focus:ring-2 focus:ring-blue-400">
                                         <option value="">Pilih Guru Mapel</option>
                                          @foreach($guru as $g)
-                                            <option value="{{ $g->id }}">{{ $g->nama_guru }}</option>
+                                            <option value="{{ $g->id_guru }}">{{ $g->nama_guru }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -226,7 +226,9 @@
                                             </div>
 
                                             <!-- Form Edit -->
-                                            <form action="{{ route('dashboard.data_pembelajaran.update') }}" method="POST" class="space-y-4">
+                                            <form action="{{ route('dashboard.data_pembelajaran.update', $p->id_pembelajaran) }}" method="POST" class="space-y-4">
+                                                @csrf
+                                                @method('PUT')
                                                 <div>
                                                     <label class="block text-sm text-left font-medium text-gray-700">Nama Mata Pelajaran</label>
                                                     <input type="text" name="nama_mapel_edit"

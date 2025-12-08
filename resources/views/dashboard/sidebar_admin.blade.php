@@ -105,7 +105,7 @@
                 </button>
 
                 <div x-show="inputNilaiOpen" x-transition class="pl-10 bg-blue-600/40 text-sm">
-                    <a href="{{ route('input.tugas') }}" 
+                    <!-- <a href="{{ route('input.tugas') }}" 
                        class="block py-2 flex items-center space-x-2 transition 
                             {{ request()->routeIs('input.tugas') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>Tugas</span>
@@ -129,6 +129,11 @@
                        class="block py-2 flex items-center space-x-2 transition 
                             {{ request()->routeIs('input.sat') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>SAT</span>
+                    </a> -->
+                    <a href="{{ route('input.rapor') }}" 
+                       class="block py-2 flex items-center space-x-2 transition 
+                            {{ request()->routeIs('input.rapor') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                        <i class="fa-solid fa-users text-xs"></i><span>Rapor</span>
                     </a>
                 </div>
             </div>

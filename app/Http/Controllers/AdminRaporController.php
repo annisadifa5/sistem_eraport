@@ -12,59 +12,54 @@ class AdminRaporController extends Controller
 {
     public function inputRapor(Request $request)
     {
-        // Ambil dropdown kelas & mapel
         $kelas = Kelas::all();
         $mapel = MataPelajaran::all();
 
-        // ambil semua siswa untuk dropdown (optional)
-        $siswa = ($request->id_kelas)
-                    ? Siswa::where('id_kelas', $request->id_kelas)->get()
-                    : collect();
+        $siswa = collect();
+        $rapor = collect();
 
-        // ambil hanya siswa terpilih untuk tampilkan form
-        $siswaTerpilih = ($request->id_siswa)
-                    ? Siswa::find($request->id_siswa)
-                    : null;
-        
-        $rapor = null;
-        if ($request->id_siswa && $request->id_mapel) {
-            $rapor = Rapor::where('id_siswa', $request->id_siswa)
+        // Jika kelas & mapel sudah dipilih → tampilkan tabel seluruh siswa
+        if ($request->id_kelas && $request->id_mapel) {
+
+            // Semua siswa dalam kelas
+            $siswa = Siswa::where('id_kelas', $request->id_kelas)->get();
+
+            // Ambil rapor per siswa (jika ada)
+            $rapor = Rapor::where('id_kelas', $request->id_kelas)
                         ->where('id_mapel', $request->id_mapel)
-                        ->first();
+                        ->get()
+                        ->keyBy('id_siswa'); 
         }
 
-
         return view('input.rapor', [
-        'kelas' => $kelas,
-        'mapel' => $mapel,
-        'siswa' => $siswa,
-        'siswaTerpilih' => $request->id_siswa ? Siswa::find($request->id_siswa) : null,
-        'rapor' => $rapor,
-        'request' => $request
-    ]);
+            'kelas' => $kelas,
+            'mapel' => $mapel,
+            'siswa' => $siswa,
+            'rapor' => $rapor,
+            'request' => $request,
+        ]);
     }
 
     public function simpanRapor(Request $request)
     {
-        Rapor::updateOrCreate(
-            [
-                'id_siswa' => $request->id_siswa,
-                'id_mapel' => $request->id_mapel,
-            ],
-            [
-                'id_kelas' => $request->id_kelas,
-                'nilai'    => $request->nilai,
-                'capaian'  => $request->capaian,
-            ]
-        );
+        foreach ($request->id_siswa as $index => $id_siswa) {
 
-        return redirect()->route('input.rapor', [
-            'id_kelas' => $request->id_kelas,
-            'id_siswa' => $request->id_siswa,
-            'id_mapel' => $request->id_mapel,
-        ])->with('success', 'Nilai berhasil disimpan!');
+            Rapor::updateOrCreate(
+                [
+                    'id_siswa' => $id_siswa,
+                    'id_mapel' => $request->id_mapel,
+                ],
+                [
+                    'id_kelas' => $request->id_kelas,
+                    'nilai'    => $request->nilai[$index],
+                    'capaian'  => $request->capaian[$index],
+                ]
+            );
+        }
 
+        return back()->with('success', 'Nilai berhasil disimpan / diperbarui!');
     }
+
 
     public function getSiswa($id_kelas)
     {

@@ -135,6 +135,11 @@
                             {{ request()->routeIs('input.rapor') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>Rapor</span>
                     </a>
+                    <a href="{{ route('input.catatan') }}" 
+                       class="block py-2 flex items-center space-x-2 transition 
+                            {{ request()->routeIs('input.catatan') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                        <i class="fa-solid fa-users text-xs"></i><span>Catatan</span>
+                    </a>
                 </div>
             </div>
 

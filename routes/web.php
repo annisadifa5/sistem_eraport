@@ -17,6 +17,7 @@ AdminSTSController,
 AdminSASController,
 AdminSATController,
 AdminRaporController,
+AdminCatatanController,
 AdminCetakController};
 use App\Http\Controllers\InputNilaiGuruController;
 use App\Http\Controllers\InputNilaiWaliController;
@@ -155,6 +156,9 @@ Route::get('input/sat', [AdminSATController::class, 'inputSAT'])->name('input.sa
 Route::get('input/rapor', [AdminRaporController::class, 'inputRapor'])->name('input.rapor');
 Route::post('/input/rapor/simpan', [AdminRaporController::class, 'simpanRapor'])->name('input.rapor.simpan');
 Route::get('/get-siswa/{id_kelas}', [AdminRaporController::class, 'getSiswa']);
+
+Route::get('/input/catatan', [AdminCatatanController::class, 'index'])->name('input.catatan');
+Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpan'])->name('input.catatan.simpan');
 
 
 Route::get('input/cetak', [AdminCetakController::class, 'cetakNilai'])->name('input.cetak');

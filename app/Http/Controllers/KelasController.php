@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kelas;
 use App\Models\AnggotaKelas;
+use App\Models\Guru;
 use Illuminate\Support\Facades\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -16,6 +17,39 @@ class KelasController extends Controller
         $kelas = Kelas::orderBy('tingkat')->get(); // ambil semua kelas + relasi anggota
         return view('dashboard.data_kelas', compact('kelas'));
     }
+
+    /**
+     * Halaman Index Data Kelas (versi rapi)
+     */
+    public function list()
+    {
+        $kelas = Kelas::orderBy('tingkat')->orderBy('nama_kelas')->get();
+
+        return view('kelas.index', compact('kelas'));
+    }
+
+    public function show($id_kelas)
+    {
+        $kelas = Kelas::with('guru')->findOrFail($id_kelas);
+
+        $anggota = \App\Models\Siswa::where('id_kelas', $id_kelas)->get();
+
+        return view('kelas.show', compact('kelas', 'anggota'));
+    }
+
+    public function edit($id_kelas)
+    {
+        $kelas = Kelas::findOrFail($id_kelas);
+        $guru = \App\Models\Guru::orderBy('nama_guru')->get();
+        return view('kelas.edit', compact('kelas', 'guru'));
+    }
+
+    public function create()
+    {
+        $guru = Guru::orderBy('nama_guru')->get(); // untuk dropdown wali kelas
+        return view('kelas.create', compact('guru'));
+    }
+
 
     // Simpan data kelas baru
     public function store(Request $request)

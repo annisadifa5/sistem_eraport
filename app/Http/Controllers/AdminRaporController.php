@@ -7,68 +7,88 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\MataPelajaran;
 use App\Models\Rapor;
+use App\Models\TahunAjaran;
 
 class AdminRaporController extends Controller
 {
     public function inputRapor(Request $request)
     {
-        // Ambil dropdown kelas & mapel
         $kelas = Kelas::all();
         $mapel = MataPelajaran::all();
+        $tahunAjaran = TahunAjaran::all();
 
-        // ambil semua siswa untuk dropdown (optional)
-        $siswa = ($request->id_kelas)
-                    ? Siswa::where('id_kelas', $request->id_kelas)->get()
-                    : collect();
+        $siswa = collect();
+        $rapor = collect();
 
-        // ambil hanya siswa terpilih untuk tampilkan form
-        $siswaTerpilih = ($request->id_siswa)
-                    ? Siswa::find($request->id_siswa)
-                    : null;
-        
-        $rapor = null;
-        if ($request->id_siswa && $request->id_mapel) {
-            $rapor = Rapor::where('id_siswa', $request->id_siswa)
+        // Jika SEMUA filter dipilih
+        if ($request->id_kelas && $request->id_mapel && $request->id_tahun_ajaran && $request->semester) {
+
+            // konversi semester ganjil/genap
+            $semester = $request->semester == 'ganjil' ? 1 : 2;
+
+            $siswa = Siswa::where('id_kelas', $request->id_kelas)->get();
+
+            $rapor = Rapor::where('id_kelas', $request->id_kelas)
                         ->where('id_mapel', $request->id_mapel)
-                        ->first();
+                        ->where('id_tahun_ajaran', $request->id_tahun_ajaran)
+                        ->where('semester', $semester)
+                        ->get()
+                        ->keyBy('id_siswa');
         }
 
 
         return view('input.rapor', [
-        'kelas' => $kelas,
-        'mapel' => $mapel,
-        'siswa' => $siswa,
-        'siswaTerpilih' => $request->id_siswa ? Siswa::find($request->id_siswa) : null,
-        'rapor' => $rapor,
-        'request' => $request
-    ]);
+            'kelas' => $kelas,
+            'mapel' => $mapel,
+            'tahunAjaran' => $tahunAjaran,
+            'siswa' => $siswa,
+            'rapor' => $rapor,
+            'request' => $request
+        ]);
     }
 
     public function simpanRapor(Request $request)
     {
-        Rapor::updateOrCreate(
-            [
-                'id_siswa' => $request->id_siswa,
-                'id_mapel' => $request->id_mapel,
-            ],
-            [
-                'id_kelas' => $request->id_kelas,
-                'nilai'    => $request->nilai,
-                'capaian'  => $request->capaian,
-            ]
-        );
+        $request->validate([
+        'id_kelas' => 'required',
+        'id_mapel' => 'required',
+        'id_tahun_ajaran' => 'required',
+        'semester' => 'required',
+        'id_siswa' => 'required|array',
+    ]);
+    $semester = $request->semester == 'ganjil' ? 1 : 2;
 
+        foreach ($request->id_siswa as $index => $id_siswa) {
+
+            $nilai = $request->nilai[$index];
+            $capaian = $request->capaian[$index];
+
+            // Jika keduanya kosong, skip simpan
+            if ($nilai === null && (!$capaian || trim($capaian) === "")) {
+            continue;
+            }
+
+            Rapor::updateOrCreate(
+                [
+                    'id_siswa'        => $id_siswa,
+                    'id_mapel'        => $request->id_mapel,
+                    'id_tahun_ajaran' => $request->id_tahun_ajaran,
+                    'semester'        => $semester,
+                ],
+                [
+                    'id_kelas' => $request->id_kelas,
+                    'nilai'    => $nilai,
+                    'capaian'  => $capaian,
+                ]
+            );
+        }
+
+        // Redirect agar data tampil kembali setelah saving
         return redirect()->route('input.rapor', [
-            'id_kelas' => $request->id_kelas,
-            'id_siswa' => $request->id_siswa,
-            'id_mapel' => $request->id_mapel,
+            'id_kelas'        => $request->id_kelas,
+            'id_mapel'        => $request->id_mapel,
+            'id_tahun_ajaran' => $request->id_tahun_ajaran,
+            'semester'        => $request->semester,
         ])->with('success', 'Nilai berhasil disimpan!');
-
     }
-
-    public function getSiswa($id_kelas)
-    {
-        return Siswa::where('id_kelas', $id_kelas)->get();
-    }
-
 }

@@ -14,6 +14,8 @@ return new class extends Migration
             $table->integer('id_kelas');
             $table->integer('id_mapel');
             $table->integer('id_siswa');
+            $table->integer('id_tahun_ajaran)');
+
 
             $table->tinyInteger('nilai')->nullable();
             $table->text('capaian')->nullable();
@@ -34,6 +36,11 @@ return new class extends Migration
             $table->foreign('id_siswa')
                   ->references('id_siswa')
                   ->on('siswa')
+                  ->onDelete('cascade');
+            
+            $table->foreign('id_tahun_ajaran')
+                  ->references('id_tahun_ajaran')
+                  ->on('tahun_ajaran')
                   ->onDelete('cascade');
         });
     }

@@ -10,7 +10,8 @@ KelasController,
 MapelController,
 PembelajaranController,
 EkskulController,
-InfoSekolahController};
+InfoSekolahController,
+CetakController};
 use App\Http\Controllers\{AdminTugasController,   
 AdminUlanganController,
 AdminSTSController,
@@ -56,23 +57,16 @@ Route::get('/dashboard/info_sekolah', [InfoSekolahController::class, 'infoSekola
 Route::post('/dashboard/info_sekolah/update', [InfoSekolahController::class, 'update_info_sekolah'])->name('dashboard.info_sekolah.update');
 
 // === Halaman Data Kelas ===
-Route::prefix('dashboard')->group(function () {
-    Route::get('/data_kelas', [KelasController::class, 'index'])->name('dashboard.data_kelas');
-    Route::post('/data_kelas/store', [KelasController::class, 'store'])->name('dashboard.data_kelas.store'); // ⬅️ Tambahkan ini
-    Route::put('/data_kelas/{id_kelas}', [KelasController::class, 'update'])->name('dashboard.data_kelas.update');
-    Route::delete('/data_kelas/{id_kelas}', [KelasController::class, 'destroy'])->name('dashboard.data_kelas.destroy');
-    Route::get('data_kelas/{id_kelas}/export', [KelasController::class, 'exportKelas'])->name('dashboard.data_kelas.export.kelas');
-
-    // anggota kelas
-    Route::get('/data_kelas/{id_kelas}/anggota', [KelasController::class, 'anggota'])->name('dashboard.data_kelas.anggota');
-    Route::post('/data_kelas/{id_kelas}/anggota', [KelasController::class, 'tambahAnggota'])->name('dashboard.data_kelas.anggota.tambah');
-    Route::delete('/anggota/{id_siswa}/hapus', [KelasController::class, 'hapusAnggota'])->name('dashboard.data_kelas.anggota.hapus');
-
-    //export
-    Route::get('data_kelas/export/pdf', [KelasController::class, 'exportPdf'])->name('dashboard.data_kelas.export.pdf');
-    Route::get('data_kelas/export/csv', [KelasController::class, 'exportCsv'])->name('dashboard.data_kelas.export.csv');
-});
-
+Route::get('/kelas', [KelasController::class, 'list'])->name('kelas.index');
+// Route::get('/kelas/{id_kelas}/anggota', [KelasController::class, 'anggota'])->name('kelas.anggota');
+Route::get('/kelas/create', [KelasController::class, 'create'])->name('kelas.create');
+Route::post('/kelas', [KelasController::class, 'store'])->name('kelas.store');
+Route::get('/kelas/{id_kelas}/edit', [KelasController::class, 'edit'])->name('kelas.edit');
+Route::put('/kelas/{id_kelas}', [KelasController::class, 'update'])->name('kelas.update');
+Route::delete('/kelas/{id_kelas}', [KelasController::class, 'destroy'])->name('kelas.destroy');
+Route::get('/kelas/{id_kelas}', [KelasController::class, 'show'])->name('kelas.show');
+Route::get('kelas/export/pdf', [KelasController::class, 'exportPdf'])->name('kelas.export.pdf');
+Route::get('kelas/export/csv', [KelasController::class, 'exportCsv'])->name('kelas.export.csv');
 
 Route::get('dashboard/data_guru', [GuruController::class, 'dataGuru'])->name('dashboard.data_guru');
 Route::post('dashboard/data_guru', [GuruController::class, 'store'])->name('dashboard.data_guru.store');
@@ -157,8 +151,14 @@ Route::get('input/rapor', [AdminRaporController::class, 'inputRapor'])->name('in
 Route::post('/input/rapor/simpan', [AdminRaporController::class, 'simpanRapor'])->name('input.rapor.simpan');
 Route::get('/get-siswa/{id_kelas}', [AdminRaporController::class, 'getSiswa']);
 
+<<<<<<< HEAD
 Route::get('/input/catatan', [AdminCatatanController::class, 'index'])->name('input.catatan');
 Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpan'])->name('input.catatan.simpan');
+=======
+Route::get('input/catatan', [AdminCatatanController::class, 'inputCatatan'])->name('input.catatan');
+Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpanCatatan'])->name('input.catatan.simpan');
+Route::get('/get-siswa/{id_kelas}', [AdminCatatanController::class, 'getSiswa']);
+>>>>>>> 13fa10f390f8554b242324e416280dc6455852b3
 
 
 Route::get('input/cetak', [AdminCetakController::class, 'cetakNilai'])->name('input.cetak');
@@ -184,4 +184,15 @@ Route::prefix('wali')->name('wali.')->group(function () {
     Route::get('/input/sas', [InputNilaiWaliController::class, 'inputSAS'])->name('input.sas');
     Route::get('/input/sat', [InputNilaiWaliController::class, 'inputSAT'])->name('input.sat');
     Route::get('input/cetak', [InputNilaiWaliController::class, 'cetakNilai'])->name('input.cetak');
+});
+
+Route::prefix('cetak')->controller(CetakController::class)->group(function () {
+    Route::get('/rapor', 'rapor')->name('cetak.rapor');
+    Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
+});
+
+Route::prefix('cetak')->group(function () {
+    Route::get('/rapor', [CetakController::class, 'index'])->name('cetak.rapor.index');
+    Route::get('/rapor/{id_siswa}', [CetakController::class, 'rapor'])->name('cetak.rapor');
+    Route::get('/rapor/{id_siswa}/pdf', [CetakController::class, 'raporPdf'])->name('cetak.rapor.pdf');
 });

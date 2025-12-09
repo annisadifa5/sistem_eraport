@@ -1,125 +1,106 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Rapor | Cetak Rapor</title>
-
-    <!-- Tailwind + Alpine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <!-- Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Cetak Rapor - {{ $siswa->nama_siswa }}</title>
 
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            font-size: 15px;
-        }
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h2 { text-align: center; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        td { padding: 4px; vertical-align: top; }
+        .section-title { font-weight: bold; background: #eee; padding: 6px; margin-top: 15px; }
     </style>
+
 </head>
+<body>
 
-<body class="bg-gray-100">
+<h2>RAPOR SISWA</h2>
+<p style="text-align:center;">Semester … / Tahun Pelajaran …</p>
 
-<div 
-  x-data="{
-      sidebarOpen: true,
-      dataSekolahOpen: false,
-      inputNilaiOpen: false,
-      cetakNilaiOpen: true,   /* <-- Biar submenu Cetak langsung terbuka */
-      modalOpen: false,
+{{-- ========================= --}}
+{{-- IDENTITAS SISWA --}}
+{{-- ========================= --}}
+<div class="section-title">A. IDENTITAS PESERTA DIDIK</div>
 
-      toggleSidebar() {
-          this.sidebarOpen = !this.sidebarOpen;
-          if (!this.sidebarOpen) {
-              this.dataSekolahOpen = false;
-              this.inputNilaiOpen = false;
-              this.cetakNilaiOpen = false;
-          }
-      }
-  }"
-  class="flex min-h-screen"
->
+<table>
+    <tr>
+        <td width="30%">Nama Lengkap</td>
+        <td>: {{ $siswa->nama_siswa }}</td>
+    </tr>
 
-    <!-- Sidebar -->
-    @include('dashboard.sidebar_admin')
+    <tr>
+        <td>NIPD</td>
+        <td>: {{ $siswa->nipd ?? '-' }}</td>
+    </tr>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 p-8">
-        <div class="bg-white rounded-2xl shadow p-8">
+    <tr>
+        <td>NISN</td>
+        <td>: {{ $siswa->nisn ?? '-' }}</td>
+    </tr>
 
-            <!-- Header -->
-            <div class="flex justify-between items-center border-b pb-3 mb-6">
-                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <i class="fa-solid fa-file-pdf text-blue-600"></i>
-                    Cetak E-Rapor
-                </h2>
-            </div>
+    <tr>
+        <td>Tempat/Tgl Lahir</td>
+        <td>: 
+            {{ $siswa->detail->tempat_lahir ?? '-' }},
+            {{ $siswa->detail->tanggal_lahir ?? '-' }}
+        </td>
+    </tr>
 
-            <!-- FORM FILTER CETAK -->
-            <form action="{{ route('cetak.rapor.pdf') }}" method="GET" class="space-y-6">
+    <tr>
+        <td>Alamat</td>
+        <td>: {{ $siswa->detail->alamat ?? '-' }}</td>
+    </tr>
 
-                <!-- Baris 1 -->
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">Kelas</label>
-                        <select name="kelas" class="w-full border rounded-lg px-3 py-2 mt-1 text-gray-700 focus:ring-2 focus:ring-blue-400">
-                            <option value="">Pilih Kelas</option>
-                            @foreach($kelas ?? [] as $k)
-                                <option value="{{ $k->id_kelas }}">{{ $k->nama_kelas }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+    <tr>
+        <td>Kelas</td>
+        <td>: {{ $siswa->kelas->nama_kelas ?? '-' }}</td>
+    </tr>
 
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">Semester</label>
-                        <select name="semester" class="w-full border rounded-lg px-3 py-2 mt-1 text-gray-700 focus:ring-2 focus:ring-blue-400">
-                            <option value="1">Ganjil</option>
-                            <option value="2">Genap</option>
-                        </select>
-                    </div>
+    <tr>
+        <td>Wali Kelas</td>
+        <td>: {{ $siswa->kelas->guru->nama_guru ?? '-' }}</td>
+    </tr>
+</table>
 
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">Tahun Ajaran</label>
-                        <select name="tahun" class="w-full border rounded-lg px-3 py-2 mt-1 text-gray-700 focus:ring-2 focus:ring-blue-400">
-                            @foreach($tahun ?? [] as $t)
-                                <option value="{{ $t }}">{{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+{{-- ================================================== --}}
+{{-- ESKUL (Jika Pakai id_ekskul di tabel siswa) --}}
+{{-- ================================================== --}}
 
-                <!-- Baris 2 -->
-                <div>
-                    <label class="text-sm font-medium text-gray-700">Nama Siswa</label>
-                    <select name="siswa" class="w-full border rounded-lg px-3 py-2 mt-1 text-gray-700 focus:ring-2 focus:ring-blue-400">
-                        <option value="">Pilih Siswa</option>
-                        @foreach($siswa ?? [] as $s)
-                            <option value="{{ $s->id_siswa }}">{{ $s->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
+@if ($siswa->ekskul)
+<div class="section-title">B. DATA EKSTRAKURIKULER</div>
 
-                <!-- Tombol Cetak -->
-                <div class="flex justify-end pt-4">
-                    <button
-                        type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow text-sm flex items-center gap-2"
-                    >
-                        <i class="fa-solid fa-print"></i>
-                        Cetak PDF
-                    </button>
-                </div>
+<table border="1">
+    <tr>
+        <td width="30%">Nama Ekskul</td>
+        <td>{{ $siswa->ekskul->nama_ekskul ?? '-' }}</td>
+    </tr>
 
-            </form>
+    <tr>
+        <td>Pembina</td>
+        <td>{{ $siswa->ekskul->guru->nama_guru ?? '-' }}</td>
+    </tr>
 
-        </div>
-    </div>
+    <tr>
+        <td>Jadwal</td>
+        <td>{{ $siswa->ekskul->jadwal_ekskul ?? '-' }}</td>
+    </tr>
+</table>
+@endif
 
-</div>
+
+{{-- =============================== --}}
+{{-- BAGIAN NILAI (NANTI DITAMBAHKAN) --}}
+{{-- =============================== --}}
+
+<div class="section-title">C. NILAI AKADEMIK</div>
+<p><i>Belum tersedia — menunggu struktur nilai selesai.</i></p>
+
+
+{{-- =============================== --}}
+{{-- BAGIAN ABSENSI --}}
+{{-- =============================== --}}
+<p class="section-title">D. ABSENSI</p>
+<p><i>Belum tersedia.</i></p>
+
 </body>
 </html>

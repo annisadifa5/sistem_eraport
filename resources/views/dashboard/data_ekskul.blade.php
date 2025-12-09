@@ -1,67 +1,17 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Data Ekstrakurikuler | E-RAPOR</title>
+@extends('layouts.master')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+@section('title', 'Data Ekskul')
 
-    <style>
-        html, body { margin: 0; padding: 0; height: 100%; overflow-x: hidden; }
-        [x-cloak] { display: none !important; }
-    </style>
-</head>
+@php
+    // SET SUBMENU YANG AKTIF UNTUK SIDEBAR
+    $dataSekolahOpen = true; 
+@endphp
 
-<body class="bg-gray-100">
-
-<div x-data="{
-        sidebarOpen: true,
-        dataSekolahOpen: true,
-        inputNilaiOpen: false,
-        /* ========== Modal Ekskul ========== */
-        showTambahEkskul: false,
-        showEditEkskul: false,
-        showHapusEkskul: false,
-
-        /* Modal siswa ekskul */
-        showTambahSiswa: false,
-        showEditSiswa: false,
-        showHapus: false,
-        
-        toggleSidebar() {
-            this.sidebarOpen = !this.sidebarOpen;
-            if (!this.sidebarOpen) {
-                this.dataSekolahOpen = false;
-                this.inputNilaiOpen = false;
-            }
-        }
-    }"
-    x-cloak
-    class="flex min-h-screen"
->
-
-    <!-- Sidebar -->
-    @if(auth()->user()->role == 'admin')
-        @include('dashboard.sidebar_admin')
-    @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 0)
-        @include('dashboard.sidebar_guru')
-    @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 1)
-        @include('dashboard.sidebar_wali')
-    @endif
+@section('content')
 
     <!-- Main Content -->
-    <div class="flex-1 p-8">
+    
         <div class="bg-white rounded-lg shadow p-6">
-
-            <!-- Header -->
-            <div class="flex justify-between items-center border-b mb-6 pb-2">
-                <h1 class="text-lg font-semibold text-gray-800">Data Ekstrakurikuler</h1>
-                <div class="flex items-center space-x-2"></div>
-            </div>
-
             <!-- Filter -->
             <form action="{{ route('dashboard.data_ekskul') }}" method="GET">
                 <div class="rounded-lg p-4 mb-6">
@@ -639,11 +589,10 @@
                   </table>
               </div>
           </div>
-    </div> <!-- end container utama -->
-</div> <!-- end content wrapper -->
+     <!-- end container utama -->
+
 
 <!-- AlpineJS -->
 <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-</body>
-</html>
+@endsection

@@ -2,94 +2,86 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\MataPelajaran;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Response;
+use App\Models\Guru;
+use Illuminate\Http\Request;
 
 class MapelController extends Controller
 {
-   // Halaman Data Mapel
-    public function dataMapel()
+    public function index()
     {
-        $mapel = MataPelajaran::orderBy('nama_mapel', 'asc')->get();
-        return view('dashboard.data_mapel', compact('mapel'));
+        $mapel = MataPelajaran::with('guru')->orderBy('kategori', 'asc')->orderBy('urutan', 'asc')->get();
+        $dataSekolahOpen = true;
+
+        return view('mapel.index', compact('mapel', 'dataSekolahOpen'));
     }
 
-    // 🔹 Simpan mapel baru
+    public function create()
+    {
+        $guru = Guru::all();
+        $dataSekolahOpen = true;
+
+        $kategoriList = [
+            1 => 'Mata Pelajaran Umum',
+            2 => 'Mata Pelajaran Kejuruan',
+            3 => 'Mata Pelajaran Pilihan',
+            4 => 'Muatan Lokal',
+        ];
+
+        return view('mapel.create', compact('guru', 'kategoriList', 'dataSekolahOpen'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'nama_mapel' => 'required|string|max:100',
-            'nama_singkat' => 'required|string|max:20',
+            'nama_mapel' => 'required',
+            'nama_singkat' => 'required',
+            // 'kelompok' => 'nullable',
+            'kategori' => 'required',
+            'urutan' => 'required|numeric',
+            'id_guru' => 'nullable|exists:guru,id_guru',
         ]);
 
-        MataPelajaran::create([
-            'nama_mapel' => $request->nama_mapel,
-            'nama_singkat' => $request->nama_singkat,
-        ]);
+        MataPelajaran::create($request->all());
 
-        return redirect()->route('dashboard.data_mapel')->with('success', 'Data mapel berhasil ditambahkan.');
+        return redirect()->route('mapel.index')->with('success','Mata Pelajaran berhasil ditambahkan');
     }
 
-    // 🔹 Update mapel
-    public function update(Request $request, $id)
+    public function edit($id_mapel)
+    {
+        $mapel = MataPelajaran::findOrFail($id_mapel);
+        $guru = Guru::all();
+        $dataSekolahOpen = true;
+
+        $kategoriList = [
+            1 => 'Mata Pelajaran Umum',
+            2 => 'Mata Pelajaran Kejuruan',
+            3 => 'Mata Pelajaran Pilihan',
+            4 => 'Muatan Lokal',
+        ];
+
+        return view('mapel.edit', compact('mapel','kategoriList','guru','dataSekolahOpen'));
+    }
+
+    public function update(Request $request, $id_mapel)
     {
         $request->validate([
-            'nama_mapel' => 'required|string|max:100',
-            'nama_singkat' => 'required|string|max:20',
+            'nama_mapel' => 'required',
+            'nama_singkat' => 'required',
+            // 'kelompok' => 'required',
+            'kategori' => 'required',
+            'urutan' => 'required|numeric',
+            'id_guru' => 'nullable|exists:guru,id_guru',
         ]);
 
-        $mapel = MataPelajaran::findOrFail($id);
-        $mapel->update([
-            'nama_mapel' => $request->nama_mapel,
-            'nama_singkat' => $request->nama_singkat,
-        ]);
+        MataPelajaran::where('id_mapel',$id_mapel)->update($request->except('_token','_method'));
 
-        return redirect()->route('dashboard.data_mapel')->with('success', 'Data mapel berhasil diperbarui.');
+        return redirect()->route('mapel.index')->with('success','Data berhasil diperbarui');
     }
 
-    // 🔹 Hapus mapel
-    public function destroy($id)
+    public function destroy($id_mapel)
     {
-        $mapel = MataPelajaran::findOrFail($id);
-        $mapel->delete();
-
-        return redirect()->route('dashboard.data_mapel')->with('success', 'Data mapel berhasil dihapus.');
+        MataPelajaran::destroy($id_mapel);
+        return back()->with('success','Data berhasil dihapus');
     }
-
-    public function exportPdf()
-{
-    $mapel = \App\Models\MataPelajaran::with('guru')->orderBy('nama_mapel', 'asc')->get();
-
-    $pdf = Pdf::loadView('exports.data_mapel_pdf', compact('mapel'))
-        ->setPaper('a4', 'landscape');
-
-    return $pdf->download('data_mapel.pdf');
-}
-
-    public function exportCsv()
-{
-    $mapel = \App\Models\MataPelajaran::with('guru')->orderBy('nama_mapel', 'asc')->get();
-
-    $filename = 'data_mapel.csv';
-    $handle = fopen($filename, 'w+');
-
-    // Header kolom
-    fputcsv($handle, ['No', 'Nama Mapel', 'Nama Singkat', 'Guru Pengampu']);
-
-    foreach ($mapel as $i => $m) {
-        fputcsv($handle, [
-            $i + 1,
-            $m->nama_mapel,
-            $m->nama_singkat,
-            $m->guru->nama_guru ?? '-',
-        ]);
-    }
-
-    fclose($handle);
-
-    return Response::download($filename)->deleteFileAfterSend(true);
-    
-}
 }

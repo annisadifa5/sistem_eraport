@@ -1,36 +1,15 @@
-<!DOCTYPE html>
-<html lang="id" x-data="{ sidebarOpen: true, dataSekolahOpen: true, inputNilaiOpen: true }" x-cloak>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Nilai Rapor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>[x-cloak]{display:none!important}</style>
-</head>
-<body class="flex bg-gray-100 min-h-screen">
+@extends('layouts.master')
 
-<!-- Sidebar -->
-      @if(auth()->user()->role == 'admin')
-          @include('dashboard.sidebar_admin')
-      @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 0)
-          @include('dashboard.sidebar_guru')
-      @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 1)
-          @include('dashboard.sidebar_wali')
-      @endif
+@section('title', 'Input Nilai Rapor')
 
-<!-- Main Content -->
-<div class="flex-1 p-8 overflow-y-auto">
-    <div class="bg-white rounded-lg shadow p-6">
+@php
+    $inputNilaiOpen = true;
+@endphp
 
-        <!-- Header -->
-        <div class="flex items-center justify-between border-b pb-3 mb-6">
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <i class="text-blue-600"></i> Input Nilai Rapor
-            </h2>
-        </div>
+@section('content')
 
+<div class="bg-white rounded-lg shadow p-6">
+     
         <!-- Notifikasi -->
         @if (session('success'))
         <div 
@@ -42,52 +21,74 @@
         </div>
         @endif
 
-        <!-- Filter Form -->
         <!-- FILTER -->
-        <form method="GET" action="{{ route('input.rapor') }}">
-            <div class="grid grid-cols-4 gap-4 mb-6">
+        <form method="GET" action="{{ route('input.rapor') }}" class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
                 <!-- Kelas -->
-                <select name="id_kelas" class="border rounded px-3 py-2">
-                    <option value="">Pilih Kelas</option>
-                    @foreach ($kelas as $k)
-                        <option value="{{ $k->id_kelas }}" {{ $request->id_kelas == $k->id_kelas ? 'selected' : '' }}>
-                            {{ $k->nama_kelas }}
-                        </option>
-                    @endforeach
-                </select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <select name="id_kelas" required class="w-full border rounded-lg p-2">
+                        <option value="">---</option>
+                        @foreach($kelas as $k)
+                            <option value="{{ $k->id_kelas }}" 
+                                {{ request('id_kelas') == $k->id_kelas ? 'selected' : '' }}>
+                                {{ $k->nama_kelas }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <!-- Mapel -->
-                <select name="id_mapel" class="border rounded px-3 py-2">
-                    <option value="">Pilih Mapel</option>
-                    @foreach ($mapel as $m)
-                        <option value="{{ $m->id_mapel }}" {{ $request->id_mapel == $m->id_mapel ? 'selected' : '' }}>
-                            {{ $m->nama_mapel }}
-                        </option>
-                    @endforeach
-                </select>
-
-                <!-- Tahun Ajaran -->
-                <select name="id_tahun_ajaran" class="border rounded px-3 py-2">
-                    <option value="">Pilih Tahun Ajaran</option>
-                    @foreach ($tahunAjaran as $t)
-                        <option value="{{ $t->id_tahun_ajaran }}" {{ $request->id_tahun_ajaran == $t->id_tahun_ajaran ? 'selected' : '' }}>
-                            {{ $t->tahun_ajaran }}
-                        </option>
-                    @endforeach
-                </select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                    <select name="id_mapel" required class="w-full border rounded-lg p-2">
+                        <option value="">---</option>
+                        @foreach ($mapel as $m)
+                            <option value="{{ $m->id_mapel }}" 
+                                {{ request('id_mapel') == $m->id_mapel ? 'selected' : '' }}>
+                                {{ $m->nama_mapel }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <!-- Semester -->
-                <select name="semester" class="border rounded px-3 py-2">
-                    <option value="">Pilih Semester</option>
-                    <option value="ganjil" {{ $request->semester == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
-                    <option value="genap" {{ $request->semester == 'genap' ? 'selected' : '' }}>Genap</option>
-                </select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <select name="semester" class="w-full border rounded-lg p-2">
+                        <option value="">---</option>
+                        <option value="ganjil" {{ request('semester') == 'ganjil' ? 'selected' : '' }}>
+                            Ganjil
+                        </option>
+                        <option value="genap" {{ request('semester') == 'genap' ? 'selected' : '' }}>
+                            Genap
+                        </option>
+                    </select>
+                </div>
 
+                <!-- Tahun Ajaran -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label>
+                    <select name="id_tahun_ajaran" class="w-full border rounded-lg p-2">
+                        <option value="">---</option>
+                        @foreach ($tahunAjaran as $t)
+                            <option value="{{ $t->id_tahun_ajaran }}" 
+                                {{ request('id_tahun_ajaran') == $t->id_tahun_ajaran ? 'selected' : '' }}>
+                                {{ $t->tahun_ajaran }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
             </div>
 
-            <button class="bg-blue-600 text-white px-4 py-2 rounded">Tampilkan</button>
+            <!-- Tombol -->
+            <div class="mt-4">
+                <button class="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-lg shadow">
+                    Tampilkan
+                </button>
+            </div>
         </form>
 
 
@@ -150,11 +151,8 @@
 
 </form>
 
+</div>
+
 @endif
 
-
-            </div>
-        </div>
-
-</body>
-</html>
+@endsection

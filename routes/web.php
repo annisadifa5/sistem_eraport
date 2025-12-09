@@ -93,10 +93,22 @@ Route::post('dashboard/data_siswa/import/csv', [SiswaController::class, 'importC
 
 
 // === Halaman Data Mapel ===
-Route::get('dashboard/data_mapel', [MapelController::class, 'dataMapel'])->name('dashboard.data_mapel');
-Route::post('/dashboard/data_mapel/store', [MapelController::class, 'store'])->name('dashboard.data_mapel.store');
-Route::put('/dashboard/data_mapel/update/{id_mapel}', [MapelController::class, 'update'])->name('dashboard.data_mapel.update');
-Route::delete('/dashboard/data_mapel/delete/{id_mapel}', [MapelController::class, 'destroy'])->name('dashboard.data_mapel.delete');
+// routes/web.php
+Route::prefix('mapel')->name('mapel.')->group(function(){
+    Route::get('/', [MapelController::class,'index'])->name('index');
+    Route::get('/create', [MapelController::class,'create'])->name('create');
+    Route::post('/store', [MapelController::class,'store'])->name('store');
+    Route::get('/edit/{id_mapel}', [MapelController::class,'edit'])->name('edit');
+    Route::put('/update/{id_mapel}', [MapelController::class,'update'])->name('update');
+    Route::delete('/delete/{id_mapel}', [MapelController::class,'destroy'])->name('destroy');
+});
+
+
+
+// Route::get('dashboard/data_mapel', [MapelController::class, 'dataMapel'])->name('dashboard.data_mapel');
+// Route::post('/dashboard/data_mapel/store', [MapelController::class, 'store'])->name('dashboard.data_mapel.store');
+// Route::put('/dashboard/data_mapel/update/{id_mapel}', [MapelController::class, 'update'])->name('dashboard.data_mapel.update');
+// Route::delete('/dashboard/data_mapel/delete/{id_mapel}', [MapelController::class, 'destroy'])->name('dashboard.data_mapel.delete');
 //export
 Route::get('/dashboard/data_mapel/export/pdf', [MapelController::class, 'exportPdf'])->name('dashboard.data_mapel.export.pdf');
 Route::get('/dashboard/data_mapel/export/csv', [MapelController::class, 'exportCsv'])->name('dashboard.data_mapel.export.csv');
@@ -151,14 +163,10 @@ Route::get('input/rapor', [AdminRaporController::class, 'inputRapor'])->name('in
 Route::post('/input/rapor/simpan', [AdminRaporController::class, 'simpanRapor'])->name('input.rapor.simpan');
 Route::get('/get-siswa/{id_kelas}', [AdminRaporController::class, 'getSiswa']);
 
-<<<<<<< HEAD
-Route::get('/input/catatan', [AdminCatatanController::class, 'index'])->name('input.catatan');
-Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpan'])->name('input.catatan.simpan');
-=======
 Route::get('input/catatan', [AdminCatatanController::class, 'inputCatatan'])->name('input.catatan');
 Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpanCatatan'])->name('input.catatan.simpan');
 Route::get('/get-siswa/{id_kelas}', [AdminCatatanController::class, 'getSiswa']);
->>>>>>> 13fa10f390f8554b242324e416280dc6455852b3
+
 
 
 Route::get('input/cetak', [AdminCetakController::class, 'cetakNilai'])->name('input.cetak');
@@ -186,13 +194,14 @@ Route::prefix('wali')->name('wali.')->group(function () {
     Route::get('input/cetak', [InputNilaiWaliController::class, 'cetakNilai'])->name('input.cetak');
 });
 
-Route::prefix('cetak')->controller(CetakController::class)->group(function () {
-    Route::get('/rapor', 'rapor')->name('cetak.rapor');
-    Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
-});
+// Route::prefix('cetak')->controller(CetakController::class)->group(function () {
+//     Route::get('/rapor', 'rapor')->name('cetak.rapor');
+//     Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
+// });
 
 Route::prefix('cetak')->group(function () {
     Route::get('/rapor', [CetakController::class, 'index'])->name('cetak.rapor.index');
     Route::get('/rapor/{id_siswa}', [CetakController::class, 'rapor'])->name('cetak.rapor');
     Route::get('/rapor/{id_siswa}/pdf', [CetakController::class, 'raporPdf'])->name('cetak.rapor.pdf');
+    Route::post('/rapor/pdf/massal', [CetakController::class,'raporPdfMassal'])->name('cetak.rapor.pdf.massal');
 });

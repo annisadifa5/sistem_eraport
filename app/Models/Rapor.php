@@ -18,14 +18,10 @@ class Rapor extends Model
         'id_mapel', 
         'id_siswa', 
         'nilai', 
-        'capaian'
+        'capaian',
+        'id_tahun_ajaran',
+        'semester'
     ];
-
-    public function rapor()
-    {
-        return $this->belongsTo(Rapor::class, 'id_rapor');
-    }
-
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas');
@@ -33,11 +29,16 @@ class Rapor extends Model
 
     public function mapel()
     {
-        return $this->belongsTo(Mapel::class, 'id_mapel');
+        return $this->belongsTo(MataPelajaran::class, 'id_mapel');
     }
 
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'id_siswa');
+    }
+
+    public function tahunAjaran()
+    {
+        return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran');
     }
 }

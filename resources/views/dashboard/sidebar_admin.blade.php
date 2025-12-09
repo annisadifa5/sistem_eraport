@@ -135,11 +135,16 @@
                             {{ request()->routeIs('input.rapor') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>Rapor</span>
                     </a>
+                    <a href="{{ route('input.catatan') }}" 
+                       class="block py-2 flex items-center space-x-2 transition 
+                            {{ request()->routeIs('input.catatan') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                        <i class="fa-solid fa-users text-xs"></i><span>Catatan</span>
+                    </a>
                 </div>
             </div>
 
             <!-- Cetak Nilai -->
-            <a href="#" 
+            <a href="{{ route('input.cetak') }}" 
                class="flex items-center py-2 transition
                     {{ request()->routeIs('dashboard.cetak') ? 'bg-blue-800' : 'hover:bg-blue-800' }}"
                :class="sidebarOpen ? 'px-4 justify-start' : 'justify-center'">

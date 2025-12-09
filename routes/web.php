@@ -10,7 +10,8 @@ KelasController,
 MapelController,
 PembelajaranController,
 EkskulController,
-InfoSekolahController};
+InfoSekolahController,
+CetakController};
 use App\Http\Controllers\{AdminTugasController,   
 AdminUlanganController,
 AdminSTSController,
@@ -180,4 +181,9 @@ Route::prefix('wali')->name('wali.')->group(function () {
     Route::get('/input/sas', [InputNilaiWaliController::class, 'inputSAS'])->name('input.sas');
     Route::get('/input/sat', [InputNilaiWaliController::class, 'inputSAT'])->name('input.sat');
     Route::get('input/cetak', [InputNilaiWaliController::class, 'cetakNilai'])->name('input.cetak');
+});
+
+Route::prefix('cetak')->controller(CetakController::class)->group(function () {
+    Route::get('/rapor', 'rapor')->name('cetak.rapor');
+    Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
 });

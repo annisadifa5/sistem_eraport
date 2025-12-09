@@ -1,64 +1,15 @@
-<!-- resources/views/dashboard/data_kelas.blade.php -->
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Data Kelas</title>
+@extends('layouts.master')
 
-    <!-- Tailwind + Alpine -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+@section('title', 'Data Kelas')
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+@php
+    // SET SUBMENU YANG AKTIF UNTUK SIDEBAR
+    $dataSekolahOpen = true; 
+@endphp
 
-    <!-- Font Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            font-size: 15px;
-        }
-    </style>
-</head>
-
-<body class="bg-gray-100">
-<div 
-  x-data="{
-      sidebarOpen: true,
-      dataSekolahOpen: true,
-      inputNilaiOpen: false,
-      modalOpen: false,
-      openEditModal: false,
-      toggleSidebar() {
-          this.sidebarOpen = !this.sidebarOpen;
-          if (!this.sidebarOpen) {
-              this.dataSekolahOpen = false;
-              this.inputNilaiOpen = false;
-          }
-      }
-  }"
-  class="flex min-h-screen"
->
-
-  <!-- Sidebar -->
-      @if(auth()->user()->role == 'admin')
-          @include('dashboard.sidebar_admin')
-      @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 0)
-          @include('dashboard.sidebar_guru')
-      @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 1)
-          @include('dashboard.sidebar_wali')
-      @endif
+@section('content')
 
     <!-- Main Content -->
-    <div class="flex-1 p-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex justify-between items-center border-b mb-6">
-                <div class="flex justify-between items-center pb-3 pt-2 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800">Detail Data Kelas</h2>
-            </div>
                 <!-- Tombol Tambah Data + Popup Modal -->
                 <div x-data="{ openModal: false }" class="text-right mb-4">
                     <button 
@@ -173,9 +124,6 @@
                         </div>
                     </div>
                 </div>
-
-            </div>
-
             <!-- Export & Search -->
             <div class="flex justify-between items-center mb-4">
                 <div class="space-x-2">
@@ -485,8 +433,6 @@
                 </div>
             </div>
             @endforeach
-        </div>
-    </div>
-</div>
-</body>
-</html>
+
+
+@endsection

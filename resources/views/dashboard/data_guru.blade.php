@@ -85,9 +85,9 @@
                         <i class="fa-regular fa-circle-right text-xs"></i><span>Info Sekolah</span>
                     </a>
 
-                    <a href="{{ route('dashboard.data_kelas') }}" 
+                    <a href="{{ route('kelas.index') }}" 
                        class="block py-2 flex items-center space-x-2 transition 
-                            {{ request()->routeIs('dashboard.data_kelas') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                            {{ request()->routeIs('kelas.index') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-chalkboard text-xs"></i><span>Data Kelas</span>
                     </a>
 

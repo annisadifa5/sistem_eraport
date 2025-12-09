@@ -1,36 +1,17 @@
-<!-- resources/views/dashboard/data_mapel.blade.php -->
-<!DOCTYPE html>
-<html lang="id" x-data="{ sidebarOpen: true, dataSekolahOpen: true, inputNilaiOpen: false, openModal: false }" x-cloak>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Mapel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>[x-cloak]{display:none!important}</style>
-</head>
-<body class="flex bg-gray-100 min-h-screen">
+@extends('layouts.master')
 
-    <!-- Sidebar -->
-      @if(auth()->user()->role == 'admin')
-          @include('dashboard.sidebar_admin')
-      @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 0)
-          @include('dashboard.sidebar_guru')
-      @elseif(auth()->user()->role == 'guru' && auth()->user()->is_walikelas == 1)
-          @include('dashboard.sidebar_wali')
-      @endif
+@section('title', 'Data Mapel')
+
+@php
+    // SET SUBMENU YANG AKTIF UNTUK SIDEBAR
+    $dataSekolahOpen = true; 
+@endphp
+
+@section('content')
 
     <!-- Main Content -->
-    <div class="flex-1 p-8">
-        <div class="bg-white rounded-lg shadow p-6">
-
             <!-- Header Judul & Tombol Tambah -->
             <div class="flex justify-between items-center border-b mb-6">
-                <div class="flex justify-between items-center pb-3 pt-2 mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">Detail Data Mata Pelajaran</h2>
-                </div>
-
                 <!-- Tombol Tambah Data -->
                 <div x-data="{ openModal: false }" class="text-right mb-4">
                     <button 
@@ -258,10 +239,4 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-
-
-</body>
-</html>
+@endsection

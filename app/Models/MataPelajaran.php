@@ -12,19 +12,37 @@ class MataPelajaran extends Model
     protected $table = 'mata_pelajaran';
     protected $primaryKey = 'id_mapel';
     public $timestamps = false;
+
     protected $fillable = [
         'nama_mapel',
         'nama_singkat',
+        'kategori',      // Umum / Kejuruan / Pilihan / Mulok
+        'urutan',        // nomor urut tampilan rapor
         'id_guru',
+        'id_pembelajaran'
     ];
 
-
     /**
-     * Relasi ke tabel guru (One to Many atau One to One tergantung kebutuhan)
-     * id_guru pada tabel mapel adalah foreign key ke tabel guru
+     * Relasi ke Guru
      */
     public function guru()
     {
         return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
+    }
+
+    /**
+     * Relasi ke Pembelajaran
+     */
+    public function pembelajaran()
+    {
+        return $this->belongsTo(Pembelajaran::class, 'id_pembelajaran', 'id_pembelajaran');
+    }
+
+    /**
+     * Scope: Grup berdasarkan kelompok (A–D)
+     */
+    public function scopeKelompok($query, $kelompok)
+    {
+        return $query->where('kelompok', $kelompok)->orderBy('urutan');
     }
 }

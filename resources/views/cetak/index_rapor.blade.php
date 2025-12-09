@@ -19,10 +19,10 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
             <select name="id_kelas" required class="w-full border rounded-lg p-2">
-                <option value="">-- Pilih Kelas --</option>
+                <option value="">---</option>
                 @foreach($kelas as $k)
                 <option value="{{ $k->id_kelas }}" {{ request('id_kelas') == $k->id_kelas ? 'selected' : '' }}>
-                    {{ $k->tingkat }} {{ $k->nama_kelas }} ({{ $k->jurusan }})
+                    {{ $k->nama_kelas }}
                 </option>
                 @endforeach
             </select>
@@ -32,7 +32,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
             <select name="semester" required class="w-full border rounded-lg p-2">
-                <option value="">-- Pilih Semester --</option>
+                <option value="">---</option>
                 <option value="ganjil" {{ request('semester') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
                 <option value="genap" {{ request('semester') == 'genap' ? 'selected' : '' }}>Genap</option>
             </select>
@@ -41,21 +41,45 @@
         <!-- Tahun -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label>
-            <select name="tahun" required class="w-full border rounded-lg p-2">
-                <option value="">-- Pilih Tahun --</option>
 
-                @php
-                    $tahun_ini = date('Y');
-                @endphp
+            @php
+                $tahunSekarang = date('Y');
+                $bulanSekarang = date('n'); // 1 - 12
 
-                @for($tahun = 2025; $tahun <= 2030; $tahun++)
-                    <option value="{{ $tahun }}" 
-                        {{ request('tahun', $tahun_ini) == $tahun ? 'selected' : '' }}>
-                        {{ $tahun }}
+                // Tentukan tahun ajaran berdasarkan aturan:
+                if ($bulanSekarang < 7) {
+                    // Januari–Juni → tahun_sekarang-1 / tahun_sekarang
+                    $defaultTA1 = $tahunSekarang - 1;
+                    $defaultTA2 = $tahunSekarang;
+                } else {
+                    // Juli–Desember → tahun_sekarang / tahun_sekarang+1
+                    $defaultTA1 = $tahunSekarang;
+                    $defaultTA2 = $tahunSekarang + 1;
+                }
+
+                $defaultTahunAjaran = $defaultTA1 . '/' . $defaultTA2;
+
+                // Range daftar tahun ajaran
+                $tahunMulai = 2025;
+                $tahunAkhir = 2032;
+            @endphp
+
+            <select name="tahun_ajaran" required class="w-full border rounded-lg p-2">
+                <option value="">---</option>
+
+                @for ($tahun = $tahunMulai; $tahun <= $tahunAkhir; $tahun++)
+                    @php
+                        $ta = $tahun . '/' . ($tahun + 1);
+                    @endphp
+
+                    <option value="{{ $ta }}" 
+                        {{ request('tahun_ajaran', $defaultTahunAjaran) == $ta ? 'selected' : '' }}>
+                        {{ $ta }}
                     </option>
                 @endfor
             </select>
         </div>
+
 
         <!-- Tombol -->
         <div class="flex items-end">
@@ -84,6 +108,9 @@
             <table class="w-full border-collapse text-left text-sm">
                 <thead class="bg-blue-600 text-white">
                     <tr>
+                        <th class="px-3 py-2 w-10 text-center">
+                            <input type="checkbox" id="checkAll">
+                        </th>    
                         <th class="px-4 py-2">No.</th>
                         <th class="px-4 py-2">Nama Siswa</th>
                         <th class="px-4 py-2">NISN</th>
@@ -93,6 +120,9 @@
                 <tbody class="text-gray-800">
                     @foreach($siswa as $i => $s)
                     <tr class="border-b hover:bg-gray-50">
+                        <td class="px-3 py-2 text-center">
+                            <input type="checkbox" name="id_siswa[]" value="{{ $s->id_siswa }}" class="checkItem">
+                        </td>
                         <td class="px-4 py-2">{{ $i+1 }}</td>
                         <td class="px-4 py-2">{{ $s->nama_siswa }}</td>
                         <td class="px-4 py-2">{{ $s->nisn }}</td>
@@ -115,6 +145,25 @@
 
                 </tbody>
             </table>
+            {{-- Tombol CETAK MASSAL --}}
+            @if(count($siswa) > 0)
+                <div class="text-right mt-4">
+                    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                        Cetak PDF Terpilih
+                    </button>
+                </div>
+            @endif
+
+            </form>
+
+
+            {{-- JS PILIH SEMUA --}}
+            <script>
+            document.getElementById('checkAll').addEventListener('click', function() {
+                let checkboxes = document.querySelectorAll('.checkItem');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+            </script>
         </div>
 
     @else

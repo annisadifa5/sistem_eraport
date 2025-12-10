@@ -27,17 +27,45 @@
     @endif
 
     <div class="flex justify-between items-center mb-4">
-        {{-- Tombol Export --}}
-        <div class="space-x-2">
+        
+        {{-- BAGIAN KIRI: Export & Import --}}
+        <div class="space-x-2 flex items-center">
+            {{-- 3. Form Import CSV (Menggunakan FORM POST) --}}
+            <form action="{{ route('guru.import') }}" method="POST" enctype="multipart/form-data" class="inline-block" onsubmit="return confirm('Yakin ingin mengimpor data guru? Data lama akan diperbarui.')">
+                @csrf
+                
+                <input type="file" name="file" id="import_guru_csv" style="display: none;" onchange="this.form.submit()">
+
+                <button type="button" 
+                        onclick="document.getElementById('import_guru_csv').click()"
+                        class="bg-blue-500/20 text-blue-700 border border-blue-400 px-4 py-1 rounded hover:bg-blue-500/30 text-sm">
+                    <i class="fa-solid fa-download"></i> Import
+                </button>
+            </form>
+            {{-- 1. Tombol Export PDF --}}
             <a href="{{ route('guru.export.pdf') }}" 
-            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block">PDF</a>
+            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block text-sm">
+                <i class="fa-solid fa-file-pdf"></i> PDF
+            </a>
+            {{-- 2. Tombol Export CSV --}}
             <a href="{{ route('guru.export.csv') }}" 
-            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block">CSV</a>
+            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block text-sm">
+                <i class="fa-solid fa-file-csv"></i> CSV
+            </a>
         </div>
 
-        {{-- Kolom Pencarian --}}
-        {{-- Anda perlu menambahkan fungsionalitas pencarian menggunakan JavaScript atau Laravel --}}
-        <input type="text" placeholder="Search..." class="border px-3 py-1 rounded focus:ring-1 focus:ring-blue-400 outline-none">
+        {{-- BAGIAN KANAN: Form Pencarian --}}
+        <form method="GET" action="{{ route('guru.index') }}" class="inline-block">
+            <input type="text" 
+                name="search" 
+                placeholder="Cari Nama Guru..." 
+                value="{{ request('search') }}" 
+                onchange="this.form.submit()"
+                class="border px-3 py-1 rounded focus:ring-1 focus:ring-blue-400 outline-none">
+            
+            {{-- Opsional: Tombol submit tersembunyi untuk support Enter Key --}}
+            <button type="submit" style="display:none;"></button>
+        </form>
     </div>
 
     {{-- Tabel Data Guru --}}

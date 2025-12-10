@@ -197,12 +197,14 @@ input[type="date"]:valid {
       sidebarOpen: true,
       dataSekolahOpen: true,
       inputNilaiOpen: false,
+      cetakNilaiOpen: false,
       modalOpen: false,
       toggleSidebar() {
           this.sidebarOpen = !this.sidebarOpen;
           if (!this.sidebarOpen) {
               this.dataSekolahOpen = false;
               this.inputNilaiOpen = false;
+              this.cetakNilaiOpen = false;
           }
       }
   }"

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Data Kelas')
+@section('title', 'Data Pembelajaran')
 
 @php
     // SET SUBMENU YANG AKTIF UNTUK SIDEBAR
@@ -10,9 +10,6 @@
 @section('content')
 
     <!-- Main Content -->
-    
-        
-
             <!-- Header Judul & Tombol Tambah -->
             <div class="flex justify-between items-center border-b mb-6">
                 
@@ -298,7 +295,4 @@
                     </tbody>
                 </table>
             </div>
-        
-    
-
 @endsection

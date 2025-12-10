@@ -13,7 +13,6 @@ class Rapor extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_rapor', 
         'id_kelas', 
         'id_mapel', 
         'id_siswa', 
@@ -37,8 +36,8 @@ class Rapor extends Model
         return $this->belongsTo(Siswa::class, 'id_siswa');
     }
 
-    public function tahunAjaran()
-    {
-        return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran');
-    }
+    // public function tahunAjaran()
+    // {
+    //     return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran');
+    // }
 }

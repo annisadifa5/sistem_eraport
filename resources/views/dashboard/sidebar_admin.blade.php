@@ -144,15 +144,6 @@
             </div>
 
             <!-- Cetak Nilai -->
-<<<<<<< HEAD
-            <a href="{{ route('input.cetak') }}" 
-               class="flex items-center py-2 transition
-                    {{ request()->routeIs('dashboard.cetak') ? 'bg-blue-800' : 'hover:bg-blue-800' }}"
-               :class="sidebarOpen ? 'px-4 justify-start' : 'justify-center'">
-                <i class="fa-solid fa-print text-2xl"></i>
-                <span x-show="sidebarOpen" class="ml-3 text-base">Cetak Nilai</span>
-            </a>
-=======
             <div>
                 <button @click="cetakNilaiOpen = !cetakNilaiOpen"
                         class="w-full flex items-center transition py-2
@@ -183,7 +174,6 @@
                 </div>
             </div>
 
->>>>>>> f2a158223a1a115ec3f2093a20be536164ae7ffe
         </nav>
     </div>
 

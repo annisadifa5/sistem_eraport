@@ -10,7 +10,14 @@ class EkskulSiswa extends Model
     use HasFactory;
 
     protected $table = 'ekskul_siswa';
-    protected $fillable = ['id_siswa', 'id_ekskul'];
+
+    protected $fillable = [
+        'id_siswa',
+        'id_ekskul',
+        'keterangan',
+        'id_catatan'
+    ];
+
     public $timestamps = false;
 
     public function siswa()
@@ -23,3 +30,4 @@ class EkskulSiswa extends Model
         return $this->belongsTo(Ekskul::class, 'id_ekskul', 'id_ekskul');
     }
 }
+

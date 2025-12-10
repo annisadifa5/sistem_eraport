@@ -7,7 +7,7 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\MataPelajaran;
 use App\Models\Rapor;
-use App\Models\TahunAjaran;
+
 
 class AdminRaporController extends Controller
 {
@@ -15,7 +15,14 @@ class AdminRaporController extends Controller
     {
         $kelas = Kelas::all();
         $mapel = MataPelajaran::all();
-        $tahunAjaran = TahunAjaran::all();
+       
+        $tahunAjaran = [
+            ['id' => '2025/2026', 'label' => '2025/2026'],
+            ['id' => '2026/2027', 'label' => '2026/2027'],
+            ['id' => '2027/2028', 'label' => '2027/2028'],
+            ['id' => '2028/2029', 'label' => '2028/2029'],
+            ['id' => '2029/2030', 'label' => '2029/2030'],
+        ];
 
         $siswa = collect();
         $rapor = collect();
@@ -38,23 +45,23 @@ class AdminRaporController extends Controller
 
 
         return view('input.rapor', [
-            'kelas' => $kelas,
-            'mapel' => $mapel,
-            'tahunAjaran' => $tahunAjaran,
-            'siswa' => $siswa,
-            'rapor' => $rapor,
-            'request' => $request
+            'kelas'         => $kelas,
+            'mapel'         => $mapel,
+            'tahunAjaran'   => $tahunAjaran,
+            'siswa'         => $siswa,
+            'rapor'         => $rapor,
+            'request'       => $request
         ]);
     }
 
     public function simpanRapor(Request $request)
     {
         $request->validate([
-        'id_kelas' => 'required',
-        'id_mapel' => 'required',
-        'id_tahun_ajaran' => 'required',
-        'semester' => 'required',
-        'id_siswa' => 'required|array',
+        'id_kelas'          => 'required',
+        'id_mapel'          => 'required',
+        'id_tahun_ajaran'   => 'required',
+        'semester'          => 'required',
+        'id_siswa'          => 'required|array',
     ]);
     $semester = $request->semester == 'ganjil' ? 1 : 2;
 

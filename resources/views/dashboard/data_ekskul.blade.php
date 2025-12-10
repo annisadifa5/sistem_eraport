@@ -349,7 +349,7 @@
                               <td class="px-4 py-2 text-center">{{ $index + 1 }}.</td>
                               <td class="px-4 py-2">{{ $item->siswa->nama_siswa }}</td>
                               <td class="px-4 py-2">{{ $item->ekskul->nama_ekskul }}</td>
-                              <td class="px-4 py-2">{{ $item->ekskul->guru->nama_guru }}</td>
+                              <td class="px-4 py-2">{{ $item->ekskul->guru->nama_guru ?? '-'}}</td>
                               <td class="px-4 py-2">{{ $item->ekskul->jadwal_ekskul }}</td>
 
                               <!-- ========================= Aksi Dropdown ========================= -->
@@ -488,7 +488,7 @@
 
                                               <h2 class="text-lg font-semibold mb-4">Edit Siswa Ekstrakurikuler</h2>
 
-                                              <form method="POST" action="{{ route('dashboard.ekskul_siswa.updateEkskulSiswa', $item->id) }}" class="space-y-4">
+                                              <form method="POST" action="{{ route('dashboard.ekskul_siswa.updateEkskulSiswa', $item->id_ekskul_siswa) }}" class="space-y-4">
                                                   @csrf
                                                   @method('PUT')
 
@@ -532,12 +532,24 @@
                                                   <!-- Jadwal -->
                                                   <div>
                                                       <label class="block text-sm font-medium text-gray-700 mb-1">Jadwal</label>
-                                                      <input 
-                                                          name="jadwal_ekskul"
-                                                          type="datetime-local"
-                                                          class="w-full border p-2 rounded text-gray-400"
-                                                          oninput="this.classList.remove('text-gray-400')"
-                                                          value="{{ isset($item->ekskul->jadwal_ekskul) ? \Carbon\Carbon::parse($item->ekskul->jadwal_ekskul)->format('Y-m-d\TH:i') : '' }}">
+                                                      @php
+                                                        $jadwal = $item->ekskul->jadwal_ekskul;
+                                                        // cek apakah value bisa diparse sebagai datetime
+                                                        $formattedJadwal = null;
+
+                                                        if (\Carbon\Carbon::canBeCreatedFromFormat('Y-m-d H:i:s', $jadwal)) {
+                                                            $formattedJadwal = \Carbon\Carbon::parse($jadwal)->format('Y-m-d\TH:i');
+                                                        }
+                                                    @endphp
+
+                                                    <input 
+                                                        name="jadwal_ekskul"
+                                                        type="datetime-local"
+                                                        class="w-full border p-2 rounded text-gray-400"
+                                                        value="{{ $formattedJadwal ?? '' }}"
+                                                    >
+
+
                                                   </div>
 
                                                   <div class="flex justify-end gap-2 mt-4">
@@ -572,7 +584,7 @@
                                               <div class="flex justify-center gap-3 mt-4">
                                                   <button @click="showHapus = false" class="px-3 py-1 bg-gray-300 rounded">Batal</button>
 
-                                                  <form method="POST" action="{{ route('dashboard.ekskul_siswa.destroyEkskulSiswa', $item->id) }}">
+                                                  <form method="POST" action="{{ route('dashboard.ekskul_siswa.destroyEkskulSiswa', $item->id_ekskul_siswa) }}">
                                                       @csrf
                                                       @method('DELETE')
                                                       <button class="px-3 py-1 bg-red-600 text-white rounded">Hapus</button>

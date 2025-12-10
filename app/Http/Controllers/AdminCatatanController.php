@@ -11,95 +11,115 @@ use App\Models\EkskulSiswa;
 
 class AdminCatatanController extends Controller
 {
+    /**
+     * Tampilkan halaman input catatan
+     */
     public function inputCatatan(Request $request)
     {
         $kelas = Kelas::all();
-        $siswa = Siswa::when($request->id_kelas, fn($q) =>
-            $q->where('id_kelas', $request->id_kelas)
-        )->get();
+        $siswa = Siswa::when($request->id_kelas, function($q) use ($request) {
+            $q->where('id_kelas', $request->id_kelas);
+        })->get();
 
+        // Tahun ajaran static
+            $tahunAjaranList = [
+                "2025/2026",
+                "2026/2027",
+                "2027/2028",
+                "2028/2029",
+                "2029/2030"
+            ];
+
+            // Semester static
+            $semesterList = ["Ganjil", "Genap"];
+
+        // Ambil data rapor siswa jika sudah pilih filter
         $rapor = null;
-        $nilaiEkskul = collect();
+        $ekskul = collect();
         $siswaTerpilih = null;
 
-        // Ambil daftar ekskul master
-        $listEkskul = Ekskul::all();
-
         if ($request->id_kelas && $request->id_siswa) {
-
             $siswaTerpilih = Siswa::find($request->id_siswa);
 
-            // Ambil rapor (atau buat baru)
-            $rapor = Rapor::where('id_kelas', $request->id_kelas)
-             ->where('id_siswa', $request->id_siswa)
-             ->first();
+            $rapor = \DB::table('catatan')
+                    ->where('id_kelas', $request->id_kelas)
+                    ->where('id_siswa', $request->id_siswa)
+                    ->where('tahun_ajaran', $request->tahun_ajaran)
+                    ->where('semester', $request->semester)
+                    ->first();
 
+            // Ambil ekskul jika sudah ada
+            $ekskul = Ekskul::all();
 
-            // Ambil data ekskul anak
-            $nilaiEkskul = EkskulSiswa::where('id_rapor', $rapor->id_rapor)->get();
-        }
+    }
 
         return view('input.catatan', [
             'kelas' => $kelas,
             'siswa' => $siswa,
             'request' => $request,
             'rapor' => $rapor,
-            'nilaiEkskul' => $nilaiEkskul,
+            'ekskul' => $ekskul,
             'siswaTerpilih' => $siswaTerpilih,
-            'listEkskul' => $listEkskul,
+            'tahunAjaranList' => $tahunAjaranList,
+            'semesterList' => $semesterList,
         ]);
     }
 
-    public function getSiswa($id_kelas)
-    {
+    /**
+     * AJAX get siswa berdasarkan kelas
+     */
+public function getSiswa($id_kelas)
+{
+    try {
         return Siswa::where('id_kelas', $id_kelas)->get();
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
-    public function simpanCatatan(Request $request)
-    {
-        $request->validate([
-            'id_kelas' => 'required',
-            'id_siswa' => 'required',
-            'sakit' => 'required|integer|min(0)',
-            'ijin' => 'required|integer|min(0)',
-            'alpha' => 'required|integer|min(0)',
-            'catatan_wali_kelas' => 'nullable|string',
-            'konkurikuler' => 'nullable|string',
-            'ekskul' => 'nullable|array',
-        ]);
 
-        // simpan catatan utama
-        $catatan = \App\Models\Catatan::updateOrCreate(
-            [
-                'id_kelas' => $request->id_kelas,
-                'id_siswa' => $request->id_siswa,
-            ],
-            [
-                'konkurikuler' => $request->konkurikuler,
-                'sakit' => $request->sakit,
-                'ijin' => $request->ijin,
-                'alpha' => $request->alpha,
-                'catatan_wali_kelas' => $request->catatan_wali_kelas,
-            ]
-        );
+    /**
+     * Simpan Catatan Rapor
+     */
+public function simpanCatatan(Request $request)
+{
+    // Ubah ekskul menjadi string
+    $idEkskul = [];
+    $keteranganEkskul = [];
 
-        // Hapus ekskul lama
-        \App\Models\EkskulSiswa::where('id_catatan', $catatan->id_catatan)->delete();
-
-        // Simpan ekskul baru
-        if ($request->ekskul) {
-            foreach ($request->ekskul as $ex) {
-                if ($ex['id_ekskul']) {
-                    \App\Models\EkskulSiswa::create([
-                        'id_catatan' => $catatan->id_catatan,
-                        'id_ekskul' => $ex['id_ekskul'],
-                        'keterangan' => $ex['keterangan'] ?? '',
-                    ]);
-                }
+    if ($request->has('ekskul')) {
+        foreach ($request->ekskul as $e) {
+            if (!empty($e['id_ekskul'])) {
+                $idEkskul[] = $e['id_ekskul'];
+                $keteranganEkskul[] = $e['keterangan'] ?? '';
             }
         }
-
-        return back()->with('success', 'Catatan rapor berhasil disimpan!');
     }
+
+    // Simpan catatan utama
+    \DB::table('catatan')->updateOrInsert(
+        [
+            'id_kelas' => $request->id_kelas,
+            'id_siswa' => $request->id_siswa,
+            'tahun_ajaran' => $request->tahun_ajaran,
+            'semester' => $request->semester,
+        ],
+        [
+            'kokurikuler' => $request->kokurikuler,
+            'id_ekskul'   => implode(',', $idEkskul),          // SIMPAN BANYAK id ekskul
+            'keterangan'  => implode(' | ', $keteranganEkskul), // SIMPAN BANYAK keterangan
+            'sakit' => $request->sakit,
+            'ijin' => $request->ijin,
+            'alpha' => $request->alpha,
+            'catatan_wali_kelas' => $request->catatan_wali_kelas,
+            'updated_at' => now(),
+        ]
+    );
+
+    return back()->with('success', 'Berhasil disimpan!');
+}
+
 
 }

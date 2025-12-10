@@ -156,7 +156,17 @@ Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpanCata
 Route::get('/get-siswa/{id_kelas}', [AdminCatatanController::class, 'getSiswa']);
 
 
-Route::get('input/cetak', [AdminCetakController::class, 'cetakNilai'])->name('input.cetak');
+// Route::get('cetak/rapor', [AdminCetakController::class, 'cetakNilai'])->name('cetak.rapor');
+Route::prefix('cetak')->controller(CetakController::class)->group(function () {
+    Route::get('/rapor', 'rapor')->name('cetak.rapor');
+    Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
+});
+
+Route::prefix('cetak')->group(function () {
+    Route::get('/rapor', [CetakController::class, 'index'])->name('cetak.rapor.index');
+    Route::get('/rapor/{id_siswa}', [CetakController::class, 'rapor'])->name('cetak.rapor');
+    Route::get('/rapor/{id_siswa}/pdf', [CetakController::class, 'raporPdf'])->name('cetak.rapor.pdf');
+});
 
 // === Halaman Guru ===
 // Route::get('guru/dashboard', [DashboardController::class, 'index'])->name('dashboard.guru');
@@ -181,13 +191,4 @@ Route::prefix('wali')->name('wali.')->group(function () {
     Route::get('input/cetak', [InputNilaiWaliController::class, 'cetakNilai'])->name('input.cetak');
 });
 
-Route::prefix('cetak')->controller(CetakController::class)->group(function () {
-    Route::get('/rapor', 'rapor')->name('cetak.rapor');
-    Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
-});
 
-Route::prefix('cetak')->group(function () {
-    Route::get('/rapor', [CetakController::class, 'index'])->name('cetak.rapor.index');
-    Route::get('/rapor/{id_siswa}', [CetakController::class, 'rapor'])->name('cetak.rapor');
-    Route::get('/rapor/{id_siswa}/pdf', [CetakController::class, 'raporPdf'])->name('cetak.rapor.pdf');
-});

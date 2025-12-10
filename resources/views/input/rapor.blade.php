@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" x-data="{ sidebarOpen: true, dataSekolahOpen: true, inputNilaiOpen: true }" x-cloak>
+<html lang="id" x-data="{ sidebarOpen: true, dataSekolahOpen: true, inputNilaiOpen: true, cetakNilaiOpen: true }" x-cloak>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,10 +71,11 @@
                 <select name="id_tahun_ajaran" class="border rounded px-3 py-2">
                     <option value="">Pilih Tahun Ajaran</option>
                     @foreach ($tahunAjaran as $t)
-                        <option value="{{ $t->id_tahun_ajaran }}" {{ $request->id_tahun_ajaran == $t->id_tahun_ajaran ? 'selected' : '' }}>
-                            {{ $t->tahun_ajaran }}
+                        <option value="{{ $t['id'] }}" {{ $request->id_tahun_ajaran == $t['id'] ? 'selected' : '' }}>
+                            {{ $t['label'] }}
                         </option>
                     @endforeach
+
                 </select>
 
                 <!-- Semester -->

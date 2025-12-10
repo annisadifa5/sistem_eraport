@@ -30,6 +30,7 @@
     sidebarOpen: true,
     dataSekolahOpen: true,
     inputNilaiOpen: false,
+    cetakNilaiOpen: false,
     openDownload: false
   }"
   class="flex min-h-screen"
@@ -139,7 +140,7 @@
                 </button>
 
                 <div x-show="inputNilaiOpen" x-transition class="pl-10 bg-blue-600/40 text-sm">
-                    <a href="{{ route('input.tugas') }}" 
+                    <!-- <a href="{{ route('input.tugas') }}" 
                        class="block py-2 flex items-center space-x-2 transition 
                             {{ request()->routeIs('input.tugas') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>Tugas</span>
@@ -163,14 +164,24 @@
                        class="block py-2 flex items-center space-x-2 transition 
                             {{ request()->routeIs('input.sat') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>SAT</span>
+                    </a> -->
+                    <a href="{{ route('input.rapor') }}" 
+                       class="block py-2 flex items-center space-x-2 transition 
+                            {{ request()->routeIs('input.rapor') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                        <i class="fa-solid fa-users text-xs"></i><span>Rapor</span>
+                    </a>
+                    <a href="{{ route('input.catatan') }}" 
+                       class="block py-2 flex items-center space-x-2 transition 
+                            {{ request()->routeIs('input.catatan') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                        <i class="fa-solid fa-users text-xs"></i><span>Catatan</span>
                     </a>
                 </div>
             </div>
 
             <!-- Cetak Nilai -->
-            <a href="#" 
+            <a href="{{ route('cetak.rapor.index') }}" 
                class="flex items-center py-2 transition
-                    {{ request()->routeIs('dashboard.cetak') ? 'bg-blue-800' : 'hover:bg-blue-800' }}"
+                    {{ request()->routeIs('cetak.*') ? 'bg-blue-800' : 'hover:bg-blue-800' }}"
                :class="sidebarOpen ? 'px-4 justify-start' : 'justify-center'">
                 <i class="fa-solid fa-print text-2xl"></i>
                 <span x-show="sidebarOpen" class="ml-3 text-base">Cetak Nilai</span>

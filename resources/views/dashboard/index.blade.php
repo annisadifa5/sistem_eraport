@@ -197,6 +197,7 @@ input[type="date"]:valid {
       sidebarOpen: true,
       dataSekolahOpen: true,
       inputNilaiOpen: false,
+      cetakNilaiOpen: false,
       modalOpen: false,
       toggleSidebar() {
           this.sidebarOpen = !this.sidebarOpen;

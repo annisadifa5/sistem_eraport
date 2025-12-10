@@ -6,390 +6,587 @@ use Illuminate\Http\Request;
 use App\Models\Guru;
 use App\Models\DetailGuru;
 use App\Models\Pembelajaran;
+use App\Models\Kelas;
+use App\Models\MataPelajaran;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Validation\Rule;
 
 class GuruController extends Controller
 {
-    // Halaman Data Guru
-    public function dataGuru()
+    public function index()
     {
-        $guru = Guru::with('detailGuru', 'pembelajaran')->get();
-        return view('dashboard.data_guru', compact('guru'));
+        // Ambil semua data guru, atau tambahkan pagination jika datanya banyak
+        $gurus = Guru::all(); 
+
+        return view('guru.index', compact('gurus'));
     }
 
-    // Simpan data guru baru
-    public function store(Request $request)
+    public function create()
     {
-        $validator = Validator::make($request->all(), [
-            // Validasi tabel guru
-            'nama_guru' => 'required|string|max:100',
-            'nip' => 'required|string|max:50|unique:guru,nip',
-            'nuptk' => 'required|string|max:50|unique:guru,nuptk',
-            'jenis_kelamin' => 'required|in:L,P',
-            'jenis_ptk' => 'required|string|max:50',
-            'role' => 'required|in:guru_mapel,walikelas_gurumapel',
-            'status' => 'required|in:aktif,non_aktif',
+        // Ambil data Kelas dan Mata Pelajaran dari database
+        $kelasList = Kelas::orderBy('nama_kelas')->get();
+        $mapelList = MataPelajaran::orderBy('nama_mapel')->get(); 
 
-            // Validasi tabel detail_guru
-            'tempat_lahir' => 'required|string|max:100',
-            'tanggal_lahir' => 'required|date',
-            'status_kepegawaian' => 'required|string|max:50',
-            'agama' => 'required|string|max:20',
-            'alamat' => 'required|string|max:255',
-            'rt' => 'required|numeric|max:999',
-            'rw' => 'required|numeric|max:999',
-            'dusun' => 'required|string|max:100',
-            'kelurahan' => 'required|string|max:100',
-            'kecamatan' => 'required|string|max:100',
-            'kode_pos' => 'required|numeric|digits:5',
-            'no_telp' => 'required|string|max:15',
-            'no_hp' => 'required|string|max:15',
-            'email' => 'required|email|max:100',
-            'tugas_tambahan' => 'nullable|string|max:100',
-            'sk_cpns' => 'required|string|max:50',
-            'tgl_cpns' => 'required|date',
-            'sk_pengangkatan' => 'required|string|max:50',
-            'tmt_pengangkatan' => 'required|date',
-            'lembaga_pengangkatan' => 'required|string|max:100',
-            'pangkat_gol' => 'required|string|max:20',
-            'sumber_gaji' => 'required|string|max:50',
-            'nama_ibu_kandung' => 'required|string|max:100',
-            'status_perkawinan' => 'required|string|max:20',
-            'nama_suami_istri' => 'nullable|string|max:100',
-            'nip_suami_istri' => 'nullable|string|max:20',
-            'pekerjaan_suami_istri' => 'nullable|string|max:50',
-            'tmt_pns' => 'required|date',
-            'lisensi_kepsek' => 'required|in:Ya,Tidak',
-            'diklat_kepengawasan' => 'required|in:Ya,Tidak',
-            'keahlian_braille' => 'required|in:Ya,Tidak',
-            'keahlian_isyarat' => 'required|in:Ya,Tidak',
-            'npwp' => 'required|string|max:25',
-            'nama_wajib_pajak' => 'required|string|max:100',
-            'kewarganegaraan' => 'required|string|max:30',
-            'bank' => 'required|string|max:50',
-            'norek_bank' => 'required|string|max:30',
-            'nama_rek' => 'required|string|max:100',
-            'nik' => 'required|string|digits:16',
-            'no_kk' => 'required|string|digits:16',
-            'karpeg' => 'required|string|max:30',
-            'karis_karsu' => 'required|string|max:30',
-            'lintang' => 'required|numeric',
-            'bujur' => 'required|numeric',
-            'nuks' => 'required|string|max:30',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation Error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // Simpan data ke tabel guru
-            $guru = Guru::create([
-                'nama_guru' => $request->nama_guru,
-                'nip' => $request->nip,
-                'nuptk' => $request->nuptk,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'jenis_ptk' => $request->jenis_ptk,
-                'role' => $request->role,
-                'status' => $request->status,
-            ]);
-
-            // Simpan data ke tabel detail_guru
-            DetailGuru::create([
-                'tempat_lahir' => $request->tempat_lahir,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'status_kepegawaian' => $request->status_kepegawaian,
-                'agama' => $request->agama,
-                'alamat' => $request->alamat,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'dusun' => $request->dusun,
-                'kelurahan' => $request->kelurahan,
-                'kecamatan' => $request->kecamatan,
-                'kode_pos' => $request->kode_pos,
-                'no_telp' => $request->no_telp,
-                'no_hp' => $request->no_hp,
-                'email' => $request->email,
-                'tugas_tambahan' => $request->tugas_tambahan,
-                'sk_cpns' => $request->sk_cpns,
-                'tgl_cpns' => $request->tgl_cpns,
-                'sk_pengangkatan' => $request->sk_pengangkatan,
-                'tmt_pengangkatan' => $request->tmt_pengangkatan,
-                'lembaga_pengangkatan' => $request->lembaga_pengangkatan,
-                'pangkat_gol' => $request->pangkat_gol,
-                'sumber_gaji' => $request->sumber_gaji,
-                'nama_ibu_kandung' => $request->nama_ibu_kandung,
-                'status_perkawinan' => $request->status_perkawinan,
-                'nama_suami_istri' => $request->nama_suami_istri,
-                'nip_suami_istri' => $request->nip_suami_istri,
-                'pekerjaan_suami_istri' => $request->pekerjaan_suami_istri,
-                'tmt_pns' => $request->tmt_pns,
-                'lisensi_kepsek' => $request->lisensi_kepsek,
-                'diklat_kepengawasan' => $request->diklat_kepengawasan,
-                'keahlian_braille' => $request->keahlian_braille,
-                'keahlian_isyarat' => $request->keahlian_isyarat,
-                'npwp' => $request->npwp,
-                'nama_wajib_pajak' => $request->nama_wajib_pajak,
-                'kewarganegaraan' => $request->kewarganegaraan,
-                'bank' => $request->bank,
-                'norek_bank' => $request->norek_bank,
-                'nama_rek' => $request->nama_rek,
-                'nik' => $request->nik,
-                'no_kk' => $request->no_kk,
-                'karpeg' => $request->karpeg,
-                'karis_karsu' => $request->karis_karsu,
-                'lintang' => $request->lintang,
-                'bujur' => $request->bujur,
-                'nuks' => $request->nuks,
-                'id_guru' => $guru->id_guru,
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data guru berhasil disimpan!',
-                'data' => $guru->load('detailGuru')
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+        // Kirim kedua variabel tersebut ke view
+        return view('guru.create', compact('kelasList', 'mapelList'));
     }
 
-    // Show data guru for edit
     public function show($id)
     {
-        $guru = Guru::with('detailGuru', 'pembelajaran')->find($id);
+        // Memuat Model Guru berdasarkan ID, sekaligus mengambil data relasi (eager loading)
+        // detailGuru, pembelajaran, pembelajaran.kelas, dan pembelajaran.mapel
+        $guru = Guru::with([
+            'detailGuru', 
+            'pembelajaran.kelas', 
+            'pembelajaran.mapel'
+        ])->findOrFail($id);
 
-        if (!$guru) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data guru tidak ditemukan'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $guru
-        ]);
+        // Kirim data yang sudah dimuat ke view 'guru.show'
+        return view('guru.show', compact('guru'));
     }
 
-    // Update data guru
+    /**
+     * Simpan guru baru yang baru dibuat ke database.
+     */
+    public function store(Request $request)
+    {
+        // 1. Validasi Data Gabungan
+        $request->validate([
+            // Field Model Guru
+            'nama_guru' => 'required|string|max:255',
+            'nip' => 'nullable|string|max:18|unique:guru,nip',
+            'nuptk' => 'nullable|string|max:16|unique:guru,nuptk',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            'jenis_ptk' => 'required|string|max:100',
+            'role' => 'required|string|max:100', 
+            'status' => 'required|in:aktif,non-aktif',
+            
+            // Field Model DetailGuru (Contoh beberapa field penting)
+            'tempat_lahir' => 'nullable|string|max:100',
+            'tanggal_lahir' => 'nullable|date',
+            'agama' => 'nullable|string|max:50',
+            'alamat' => 'nullable|string|max:255',
+            'no_hp' => 'nullable|string|max:15',
+            'email' => 'nullable|email|unique:detail_guru,email', 
+            'nik' => 'nullable|string|max:20|unique:detail_guru,nik',
+            
+            // Field Model Pembelajaran (Jika di-input sebagai array)
+            'pembelajaran.*.id_kelas' => 'nullable|integer|exists:kelas,id_kelas',
+            'pembelajaran.*.id_mapel' => 'nullable|integer|exists:mata_pelajaran,id_mapel',
+        ]);
+
+        // 2. Database Transaction
+        DB::beginTransaction();
+
+            try {
+                // A. Create Model Guru - Ganti getFillable() dengan array field
+            $guru = Guru::create($request->only([
+                'nama_guru', 'nip', 'nuptk', 'jenis_kelamin', 'jenis_ptk', 'role', 'status'
+            ]));
+
+            // B. Create Model DetailGuru - Ganti getFillable() dengan array field
+            $detailData = $request->only([
+                'tempat_lahir', 'tanggal_lahir', 'status_kepegawaian', 'agama', 'alamat', 'rt', 'rw', 'dusun', 'kelurahan', 'kecamatan', 'kode_pos', 'no_telp', 'no_hp', 'email', 'tugas_tambahan', 'sk_cpns', 'tgl_cpns', 'sk_pengangkatan', 'tmt_pengangkatan', 'lembaga_pengangkatan', 'pangkat_gol', 'sumber_gaji', 'nama_ibu_kandung', 'status_perkawinan', 'nama_suami_istri', 'nip_suami_istri', 'pekerjaan_suami_istri', 'tmt_pns', 'lisensi_kepsek', 'diklat_kepengawasan', 'keahlian_braille', 'keahlian_isyarat', 'npwp', 'nama_wajib_pajak', 'kewarganegaraan', 'bank', 'norek_bank', 'nama_rek', 'nik', 'no_kk', 'karpeg', 'karis_karsu', 'lintang', 'bujur', 'nuks'
+            ]);
+            
+            // ... (Logika create DetailGuru dan Pembelajaran)
+            $guru->detailGuru()->create($detailData);
+
+            // ... (Logika Pembelajaran)
+            
+            DB::commit();
+            return redirect()->route('guru.index')->with('success', 'Data Guru berhasil ditambahkan!');
+        
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("Error saat menyimpan data Guru: " . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data guru: ' . $e->getMessage());
+        }
+    }
+
+
+    // --- METHOD EDIT ---
+    /**
+     * Tampilkan form untuk mengedit guru tertentu.
+     */
+    public function edit($id)
+    {
+        // Eager loading relasi DetailGuru dan Pembelajaran
+        $guru = Guru::with('detailGuru', 'pembelajaran')
+                    ->findOrFail($id);
+        
+        // Asumsi: Anda juga butuh daftar Kelas dan Mata Pelajaran untuk form Pembelajaran
+        $kelasList = Kelas::all(); // Ganti Kelas dengan nama model Anda
+        $mapelList = MataPelajaran::all(); // Ganti MataPelajaran dengan nama model Anda
+
+        return view('guru.edit', compact('guru', 'kelasList', 'mapelList'));
+    }
+
+    /**
+     * Perbarui data guru tertentu di database.
+     */
     public function update(Request $request, $id)
     {
-        $guru = Guru::find($id);
+        $guru = Guru::findOrFail($id);
 
-        if (!$guru) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data guru tidak ditemukan'
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            // Validasi tabel guru
-            'nama_guru' => 'required|string|max:100',
-            'nip' => 'required|string|max:50|unique:guru,nip,'.$id.',id_guru',
-            'nuptk' => 'required|string|max:50|unique:guru,nuptk,'.$id.',id_guru',
-            'jenis_kelamin' => 'required|in:L,P',
-            'jenis_ptk' => 'required|string|max:50',
-            'role' => 'required|in:guru_mapel,walikelas_gurumapel',
-            'status' => 'required|in:aktif,non_aktif',
-
-            // Validasi tabel detail_guru
-            'tempat_lahir' => 'required|string|max:100',
-            'tanggal_lahir' => 'required|date',
-            'status_kepegawaian' => 'required|string|max:50',
-            'agama' => 'required|string|max:20',
-            'alamat' => 'required|string|max:255',
-            'rt' => 'required|numeric|max:999',
-            'rw' => 'required|numeric|max:999',
-            'dusun' => 'required|string|max:100',
-            'kelurahan' => 'required|string|max:100',
-            'kecamatan' => 'required|string|max:100',
-            'kode_pos' => 'required|numeric|digits:5',
-            'no_telp' => 'required|string|max:15',
-            'no_hp' => 'required|string|max:15',
-            'email' => 'required|email|max:100',
-            'tugas_tambahan' => 'nullable|string|max:100',
-            'sk_cpns' => 'required|string|max:50',
-            'tgl_cpns' => 'required|date',
-            'sk_pengangkatan' => 'required|string|max:50',
-            'tmt_pengangkatan' => 'required|date',
-            'lembaga_pengangkatan' => 'required|string|max:100',
-            'pangkat_gol' => 'required|string|max:20',
-            'sumber_gaji' => 'required|string|max:50',
-            'nama_ibu_kandung' => 'required|string|max:100',
-            'status_perkawinan' => 'required|string|max:20',
-            'nama_suami_istri' => 'nullable|string|max:100',
-            'nip_suami_istri' => 'nullable|string|max:20',
-            'pekerjaan_suami_istri' => 'nullable|string|max:50',
-            'tmt_pns' => 'required|date',
-            'lisensi_kepsek' => 'required|in:Ya,Tidak',
-            'diklat_kepengawasan' => 'required|in:Ya,Tidak',
-            'keahlian_braille' => 'required|in:Ya,Tidak',
-            'keahlian_isyarat' => 'required|in:Ya,Tidak',
-            'npwp' => 'required|string|max:25',
-            'nama_wajib_pajak' => 'required|string|max:100',
-            'kewarganegaraan' => 'required|string|max:30',
-            'bank' => 'required|string|max:50',
-            'norek_bank' => 'required|string|max:30',
-            'nama_rek' => 'required|string|max:100',
-            'nik' => 'required|string|digits:16',
-            'no_kk' => 'required|string|digits:16',
-            'karpeg' => 'required|string|max:30',
-            'karis_karsu' => 'required|string|max:30',
-            'lintang' => 'required|numeric',
-            'bujur' => 'required|numeric',
-            'nuks' => 'required|string|max:30',
+        // 1. Validasi Data Gabungan
+        $request->validate([
+            // ... (Validasi Guru dan DetailGuru yang sama)
+            'nip' => ['nullable', 'string', 'max:18', Rule::unique('guru', 'nip')->ignore($guru->id_guru, 'id_guru')],
+            // ...
+            
+            // Field Model Pembelajaran (Dibuat OPSI)
+            'pembelajaran.*.id_kelas' => 'nullable|integer|exists:kelas,id_kelas',
+            'pembelajaran.*.id_mapel' => 'nullable|integer|exists:mata_pelajaran,id_mapel',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation Error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        DB::beginTransaction();
 
-        try {
-            DB::beginTransaction();
+            try {
+                // A. Update Model Guru - Ganti getFillable() dengan array field
+            $guru->update($request->only([
+                'nama_guru', 'nip', 'nuptk', 'jenis_kelamin', 'jenis_ptk', 'role', 'status'
+            ]));
 
-            // Update data tabel guru
-            $guru->update([
-                'nama_guru' => $request->nama_guru,
-                'nip' => $request->nip,
-                'nuptk' => $request->nuptk,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'jenis_ptk' => $request->jenis_ptk,
-                'role' => $request->role,
-                'status' => $request->status,
+            // B. Update Model DetailGuru - Ganti getFillable() dengan array field
+            $detailData = $request->only([
+                'tempat_lahir', 'tanggal_lahir', 'status_kepegawaian', 'agama', 'alamat', 'rt', 'rw', 'dusun', 'kelurahan', 'kecamatan', 'kode_pos', 'no_telp', 'no_hp', 'email', 'tugas_tambahan', 'sk_cpns', 'tgl_cpns', 'sk_pengangkatan', 'tmt_pengangkatan', 'lembaga_pengangkatan', 'pangkat_gol', 'sumber_gaji', 'nama_ibu_kandung', 'status_perkawinan', 'nama_suami_istri', 'nip_suami_istri', 'pekerjaan_suami_istri', 'tmt_pns', 'lisensi_kepsek', 'diklat_kepengawasan', 'keahlian_braille', 'keahlian_isyarat', 'npwp', 'nama_wajib_pajak', 'kewarganegaraan', 'bank', 'norek_bank', 'nama_rek', 'nik', 'no_kk', 'karpeg', 'karis_karsu', 'lintang', 'bujur', 'nuks'
             ]);
-
-            // Update atau create data detail_guru
-            $detailData = [
-                'tempat_lahir' => $request->tempat_lahir,
-                'tanggal_lahir' => $request->tanggal_lahir,
-                'status_kepegawaian' => $request->status_kepegawaian,
-                'agama' => $request->agama,
-                'alamat' => $request->alamat,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'dusun' => $request->dusun,
-                'kelurahan' => $request->kelurahan,
-                'kecamatan' => $request->kecamatan,
-                'kode_pos' => $request->kode_pos,
-                'no_telp' => $request->no_telp,
-                'no_hp' => $request->no_hp,
-                'email' => $request->email,
-                'tugas_tambahan' => $request->tugas_tambahan,
-                'sk_cpns' => $request->sk_cpns,
-                'tgl_cpns' => $request->tgl_cpns,
-                'sk_pengangkatan' => $request->sk_pengangkatan,
-                'tmt_pengangkatan' => $request->tmt_pengangkatan,
-                'lembaga_pengangkatan' => $request->lembaga_pengangkatan,
-                'pangkat_gol' => $request->pangkat_gol,
-                'sumber_gaji' => $request->sumber_gaji,
-                'nama_ibu_kandung' => $request->nama_ibu_kandung,
-                'status_perkawinan' => $request->status_perkawinan,
-                'nama_suami_istri' => $request->nama_suami_istri,
-                'nip_suami_istri' => $request->nip_suami_istri,
-                'pekerjaan_suami_istri' => $request->pekerjaan_suami_istri,
-                'tmt_pns' => $request->tmt_pns,
-                'lisensi_kepsek' => $request->lisensi_kepsek,
-                'diklat_kepengawasan' => $request->diklat_kepengawasan,
-                'keahlian_braille' => $request->keahlian_braille,
-                'keahlian_isyarat' => $request->keahlian_isyarat,
-                'npwp' => $request->npwp,
-                'nama_wajib_pajak' => $request->nama_wajib_pajak,
-                'kewarganegaraan' => $request->kewarganegaraan,
-                'bank' => $request->bank,
-                'norek_bank' => $request->norek_bank,
-                'nama_rek' => $request->nama_rek,
-                'nik' => $request->nik,
-                'no_kk' => $request->no_kk,
-                'karpeg' => $request->karpeg,
-                'karis_karsu' => $request->karis_karsu,
-                'lintang' => $request->lintang,
-                'bujur' => $request->bujur,
-                'nuks' => $request->nuks,
-                'id_guru' => $guru->id_guru,
-            ];
-
-            if ($guru->detailGuru) {
-                $guru->detailGuru->update($detailData);
-            } else {
-                DetailGuru::create($detailData);
-            }
+            
+            // ... (Logika update DetailGuru dan Pembelajaran)
+            $guru->detailGuru()->updateOrCreate(
+                ['id_guru' => $guru->id_guru],
+                $detailData
+            );
+            
+            // ... (Logika Pembelajaran)
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data guru berhasil diperbarui!',
-                'data' => $guru->load('detailGuru')
-            ]);
-
+            return redirect()->route('guru.index')->with('success', 'Data Guru dan detailnya berhasil diperbarui!');
+        
         } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            DB::rollBack();
+            \Log::error("Error saat memperbarui data Guru: " . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data guru: ' . $e->getMessage());
         }
     }
 
-    // Hapus data guru
+
+    // --- METHOD DELETE (DESTROY) ---
+    /**
+     * Hapus guru tertentu dari database.
+     */
     public function destroy($id)
     {
-        $guru = Guru::find($id);
-
-        if (!$guru) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data guru tidak ditemukan'
-            ], 404);
-        }
+        DB::beginTransaction();
 
         try {
-            DB::beginTransaction();
-
-            // Hapus detail_guru jika ada
+            $guru = Guru::findOrFail($id);
+            
+            // Hapus data DetailGuru terkait 
             if ($guru->detailGuru) {
                 $guru->detailGuru->delete();
             }
 
-            // Hapus guru
+            // Hapus data Pembelajaran terkait 
+            $guru->pembelajaran()->delete(); 
+
+            // Hapus Model Guru utama
             $guru->delete();
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Data guru berhasil dihapus!'
-            ]);
+            return redirect()->route('guru.index')->with('success', 'Data Guru dan semua relasinya berhasil dihapus!');
 
         } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus data guru: ' . $e->getMessage());
         }
     }
+    
+    // Anda mungkin juga perlu method 'show' untuk menampilkan detail guru
+    // public function show($id) { ... }
+
+    
+    // // Halaman Data Guru
+    // public function dataGuru()
+    // {
+    //     $guru = Guru::with('detailGuru', 'pembelajaran')->get();
+    //     return view('dashboard.data_guru', compact('guru'));
+    // }
+
+    // // Simpan data guru baru
+    // public function store(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         // Validasi tabel guru
+    //         'nama_guru' => 'required|string|max:100',
+    //         'nip' => 'required|string|max:50|unique:guru,nip',
+    //         'nuptk' => 'required|string|max:50|unique:guru,nuptk',
+    //         'jenis_kelamin' => 'required|in:L,P',
+    //         'jenis_ptk' => 'required|string|max:50',
+    //         'role' => 'required|in:guru_mapel,walikelas_gurumapel',
+    //         'status' => 'required|in:aktif,non_aktif',
+
+    //         // Validasi tabel detail_guru
+    //         'tempat_lahir' => 'required|string|max:100',
+    //         'tanggal_lahir' => 'required|date',
+    //         'status_kepegawaian' => 'required|string|max:50',
+    //         'agama' => 'required|string|max:20',
+    //         'alamat' => 'required|string|max:255',
+    //         'rt' => 'required|numeric|max:999',
+    //         'rw' => 'required|numeric|max:999',
+    //         'dusun' => 'required|string|max:100',
+    //         'kelurahan' => 'required|string|max:100',
+    //         'kecamatan' => 'required|string|max:100',
+    //         'kode_pos' => 'required|numeric|digits:5',
+    //         'no_telp' => 'required|string|max:15',
+    //         'no_hp' => 'required|string|max:15',
+    //         'email' => 'required|email|max:100',
+    //         'tugas_tambahan' => 'nullable|string|max:100',
+    //         'sk_cpns' => 'required|string|max:50',
+    //         'tgl_cpns' => 'required|date',
+    //         'sk_pengangkatan' => 'required|string|max:50',
+    //         'tmt_pengangkatan' => 'required|date',
+    //         'lembaga_pengangkatan' => 'required|string|max:100',
+    //         'pangkat_gol' => 'required|string|max:20',
+    //         'sumber_gaji' => 'required|string|max:50',
+    //         'nama_ibu_kandung' => 'required|string|max:100',
+    //         'status_perkawinan' => 'required|string|max:20',
+    //         'nama_suami_istri' => 'nullable|string|max:100',
+    //         'nip_suami_istri' => 'nullable|string|max:20',
+    //         'pekerjaan_suami_istri' => 'nullable|string|max:50',
+    //         'tmt_pns' => 'required|date',
+    //         'lisensi_kepsek' => 'required|in:Ya,Tidak',
+    //         'diklat_kepengawasan' => 'required|in:Ya,Tidak',
+    //         'keahlian_braille' => 'required|in:Ya,Tidak',
+    //         'keahlian_isyarat' => 'required|in:Ya,Tidak',
+    //         'npwp' => 'required|string|max:25',
+    //         'nama_wajib_pajak' => 'required|string|max:100',
+    //         'kewarganegaraan' => 'required|string|max:30',
+    //         'bank' => 'required|string|max:50',
+    //         'norek_bank' => 'required|string|max:30',
+    //         'nama_rek' => 'required|string|max:100',
+    //         'nik' => 'required|string|digits:16',
+    //         'no_kk' => 'required|string|digits:16',
+    //         'karpeg' => 'required|string|max:30',
+    //         'karis_karsu' => 'required|string|max:30',
+    //         'lintang' => 'required|numeric',
+    //         'bujur' => 'required|numeric',
+    //         'nuks' => 'required|string|max:30',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Validation Error',
+    //             'errors' => $validator->errors()
+    //         ], 422);
+    //     }
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Simpan data ke tabel guru
+    //         $guru = Guru::create([
+    //             'nama_guru' => $request->nama_guru,
+    //             'nip' => $request->nip,
+    //             'nuptk' => $request->nuptk,
+    //             'jenis_kelamin' => $request->jenis_kelamin,
+    //             'jenis_ptk' => $request->jenis_ptk,
+    //             'role' => $request->role,
+    //             'status' => $request->status,
+    //         ]);
+
+    //         // Simpan data ke tabel detail_guru
+    //         DetailGuru::create([
+    //             'tempat_lahir' => $request->tempat_lahir,
+    //             'tanggal_lahir' => $request->tanggal_lahir,
+    //             'status_kepegawaian' => $request->status_kepegawaian,
+    //             'agama' => $request->agama,
+    //             'alamat' => $request->alamat,
+    //             'rt' => $request->rt,
+    //             'rw' => $request->rw,
+    //             'dusun' => $request->dusun,
+    //             'kelurahan' => $request->kelurahan,
+    //             'kecamatan' => $request->kecamatan,
+    //             'kode_pos' => $request->kode_pos,
+    //             'no_telp' => $request->no_telp,
+    //             'no_hp' => $request->no_hp,
+    //             'email' => $request->email,
+    //             'tugas_tambahan' => $request->tugas_tambahan,
+    //             'sk_cpns' => $request->sk_cpns,
+    //             'tgl_cpns' => $request->tgl_cpns,
+    //             'sk_pengangkatan' => $request->sk_pengangkatan,
+    //             'tmt_pengangkatan' => $request->tmt_pengangkatan,
+    //             'lembaga_pengangkatan' => $request->lembaga_pengangkatan,
+    //             'pangkat_gol' => $request->pangkat_gol,
+    //             'sumber_gaji' => $request->sumber_gaji,
+    //             'nama_ibu_kandung' => $request->nama_ibu_kandung,
+    //             'status_perkawinan' => $request->status_perkawinan,
+    //             'nama_suami_istri' => $request->nama_suami_istri,
+    //             'nip_suami_istri' => $request->nip_suami_istri,
+    //             'pekerjaan_suami_istri' => $request->pekerjaan_suami_istri,
+    //             'tmt_pns' => $request->tmt_pns,
+    //             'lisensi_kepsek' => $request->lisensi_kepsek,
+    //             'diklat_kepengawasan' => $request->diklat_kepengawasan,
+    //             'keahlian_braille' => $request->keahlian_braille,
+    //             'keahlian_isyarat' => $request->keahlian_isyarat,
+    //             'npwp' => $request->npwp,
+    //             'nama_wajib_pajak' => $request->nama_wajib_pajak,
+    //             'kewarganegaraan' => $request->kewarganegaraan,
+    //             'bank' => $request->bank,
+    //             'norek_bank' => $request->norek_bank,
+    //             'nama_rek' => $request->nama_rek,
+    //             'nik' => $request->nik,
+    //             'no_kk' => $request->no_kk,
+    //             'karpeg' => $request->karpeg,
+    //             'karis_karsu' => $request->karis_karsu,
+    //             'lintang' => $request->lintang,
+    //             'bujur' => $request->bujur,
+    //             'nuks' => $request->nuks,
+    //             'id_guru' => $guru->id_guru,
+    //         ]);
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data guru berhasil disimpan!',
+    //             'data' => $guru->load('detailGuru')
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    // // Show data guru for edit
+    // public function show($id)
+    // {
+    //     $guru = Guru::with('detailGuru', 'pembelajaran')->find($id);
+
+    //     if (!$guru) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Data guru tidak ditemukan'
+    //         ], 404);
+    //     }
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $guru
+    //     ]);
+    // }
+
+    // // Update data guru
+    // public function update(Request $request, $id)
+    // {
+    //     $guru = Guru::find($id);
+
+    //     if (!$guru) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Data guru tidak ditemukan'
+    //         ], 404);
+    //     }
+
+    //     $validator = Validator::make($request->all(), [
+    //         // Validasi tabel guru
+    //         'nama_guru' => 'required|string|max:100',
+    //         'nip' => 'required|string|max:50|unique:guru,nip,'.$id.',id_guru',
+    //         'nuptk' => 'required|string|max:50|unique:guru,nuptk,'.$id.',id_guru',
+    //         'jenis_kelamin' => 'required|in:L,P',
+    //         'jenis_ptk' => 'required|string|max:50',
+    //         'role' => 'required|in:guru_mapel,walikelas_gurumapel',
+    //         'status' => 'required|in:aktif,non_aktif',
+
+    //         // Validasi tabel detail_guru
+    //         'tempat_lahir' => 'required|string|max:100',
+    //         'tanggal_lahir' => 'required|date',
+    //         'status_kepegawaian' => 'required|string|max:50',
+    //         'agama' => 'required|string|max:20',
+    //         'alamat' => 'required|string|max:255',
+    //         'rt' => 'required|numeric|max:999',
+    //         'rw' => 'required|numeric|max:999',
+    //         'dusun' => 'required|string|max:100',
+    //         'kelurahan' => 'required|string|max:100',
+    //         'kecamatan' => 'required|string|max:100',
+    //         'kode_pos' => 'required|numeric|digits:5',
+    //         'no_telp' => 'required|string|max:15',
+    //         'no_hp' => 'required|string|max:15',
+    //         'email' => 'required|email|max:100',
+    //         'tugas_tambahan' => 'nullable|string|max:100',
+    //         'sk_cpns' => 'required|string|max:50',
+    //         'tgl_cpns' => 'required|date',
+    //         'sk_pengangkatan' => 'required|string|max:50',
+    //         'tmt_pengangkatan' => 'required|date',
+    //         'lembaga_pengangkatan' => 'required|string|max:100',
+    //         'pangkat_gol' => 'required|string|max:20',
+    //         'sumber_gaji' => 'required|string|max:50',
+    //         'nama_ibu_kandung' => 'required|string|max:100',
+    //         'status_perkawinan' => 'required|string|max:20',
+    //         'nama_suami_istri' => 'nullable|string|max:100',
+    //         'nip_suami_istri' => 'nullable|string|max:20',
+    //         'pekerjaan_suami_istri' => 'nullable|string|max:50',
+    //         'tmt_pns' => 'required|date',
+    //         'lisensi_kepsek' => 'required|in:Ya,Tidak',
+    //         'diklat_kepengawasan' => 'required|in:Ya,Tidak',
+    //         'keahlian_braille' => 'required|in:Ya,Tidak',
+    //         'keahlian_isyarat' => 'required|in:Ya,Tidak',
+    //         'npwp' => 'required|string|max:25',
+    //         'nama_wajib_pajak' => 'required|string|max:100',
+    //         'kewarganegaraan' => 'required|string|max:30',
+    //         'bank' => 'required|string|max:50',
+    //         'norek_bank' => 'required|string|max:30',
+    //         'nama_rek' => 'required|string|max:100',
+    //         'nik' => 'required|string|digits:16',
+    //         'no_kk' => 'required|string|digits:16',
+    //         'karpeg' => 'required|string|max:30',
+    //         'karis_karsu' => 'required|string|max:30',
+    //         'lintang' => 'required|numeric',
+    //         'bujur' => 'required|numeric',
+    //         'nuks' => 'required|string|max:30',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Validation Error',
+    //             'errors' => $validator->errors()
+    //         ], 422);
+    //     }
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Update data tabel guru
+    //         $guru->update([
+    //             'nama_guru' => $request->nama_guru,
+    //             'nip' => $request->nip,
+    //             'nuptk' => $request->nuptk,
+    //             'jenis_kelamin' => $request->jenis_kelamin,
+    //             'jenis_ptk' => $request->jenis_ptk,
+    //             'role' => $request->role,
+    //             'status' => $request->status,
+    //         ]);
+
+    //         // Update atau create data detail_guru
+    //         $detailData = [
+    //             'tempat_lahir' => $request->tempat_lahir,
+    //             'tanggal_lahir' => $request->tanggal_lahir,
+    //             'status_kepegawaian' => $request->status_kepegawaian,
+    //             'agama' => $request->agama,
+    //             'alamat' => $request->alamat,
+    //             'rt' => $request->rt,
+    //             'rw' => $request->rw,
+    //             'dusun' => $request->dusun,
+    //             'kelurahan' => $request->kelurahan,
+    //             'kecamatan' => $request->kecamatan,
+    //             'kode_pos' => $request->kode_pos,
+    //             'no_telp' => $request->no_telp,
+    //             'no_hp' => $request->no_hp,
+    //             'email' => $request->email,
+    //             'tugas_tambahan' => $request->tugas_tambahan,
+    //             'sk_cpns' => $request->sk_cpns,
+    //             'tgl_cpns' => $request->tgl_cpns,
+    //             'sk_pengangkatan' => $request->sk_pengangkatan,
+    //             'tmt_pengangkatan' => $request->tmt_pengangkatan,
+    //             'lembaga_pengangkatan' => $request->lembaga_pengangkatan,
+    //             'pangkat_gol' => $request->pangkat_gol,
+    //             'sumber_gaji' => $request->sumber_gaji,
+    //             'nama_ibu_kandung' => $request->nama_ibu_kandung,
+    //             'status_perkawinan' => $request->status_perkawinan,
+    //             'nama_suami_istri' => $request->nama_suami_istri,
+    //             'nip_suami_istri' => $request->nip_suami_istri,
+    //             'pekerjaan_suami_istri' => $request->pekerjaan_suami_istri,
+    //             'tmt_pns' => $request->tmt_pns,
+    //             'lisensi_kepsek' => $request->lisensi_kepsek,
+    //             'diklat_kepengawasan' => $request->diklat_kepengawasan,
+    //             'keahlian_braille' => $request->keahlian_braille,
+    //             'keahlian_isyarat' => $request->keahlian_isyarat,
+    //             'npwp' => $request->npwp,
+    //             'nama_wajib_pajak' => $request->nama_wajib_pajak,
+    //             'kewarganegaraan' => $request->kewarganegaraan,
+    //             'bank' => $request->bank,
+    //             'norek_bank' => $request->norek_bank,
+    //             'nama_rek' => $request->nama_rek,
+    //             'nik' => $request->nik,
+    //             'no_kk' => $request->no_kk,
+    //             'karpeg' => $request->karpeg,
+    //             'karis_karsu' => $request->karis_karsu,
+    //             'lintang' => $request->lintang,
+    //             'bujur' => $request->bujur,
+    //             'nuks' => $request->nuks,
+    //             'id_guru' => $guru->id_guru,
+    //         ];
+
+    //         if ($guru->detailGuru) {
+    //             $guru->detailGuru->update($detailData);
+    //         } else {
+    //             DetailGuru::create($detailData);
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data guru berhasil diperbarui!',
+    //             'data' => $guru->load('detailGuru')
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    // // Hapus data guru
+    // public function destroy($id)
+    // {
+    //     $guru = Guru::find($id);
+
+    //     if (!$guru) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Data guru tidak ditemukan'
+    //         ], 404);
+    //     }
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Hapus detail_guru jika ada
+    //         if ($guru->detailGuru) {
+    //             $guru->detailGuru->delete();
+    //         }
+
+    //         // Hapus guru
+    //         $guru->delete();
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data guru berhasil dihapus!'
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
         // PDF CSV
     public function exportPdf()

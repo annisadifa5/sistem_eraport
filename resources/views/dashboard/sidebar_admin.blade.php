@@ -57,15 +57,15 @@
                         <i class="fa-solid fa-chalkboard text-xs"></i><span>Data Kelas</span>
                     </a>
 
-                     <a href="{{ route('dashboard.data_guru') }}" 
+                    <a href="{{ route('guru.index') }}" 
                        class="block py-2 flex items-center space-x-2 transition 
-                            {{ request()->routeIs('dashboard.data_guru') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                            {{ request()->routeIs('guru.index') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-chalkboard text-xs"></i><span>Data Guru</span>
                     </a>
 
-                    <a href="{{ route('dashboard.data_siswa') }}" 
+                    <a href="{{ route('siswa.index') }}" 
                        class="block py-2 flex items-center space-x-2 transition 
-                            {{ request()->routeIs('dashboard.data_siswa') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
+                            {{ request()->routeIs('siswa.index') ? 'bg-blue-700/70 rounded-l-md' : 'hover:bg-blue-700' }}">
                         <i class="fa-solid fa-users text-xs"></i><span>Data Siswa</span>
                     </a>
 

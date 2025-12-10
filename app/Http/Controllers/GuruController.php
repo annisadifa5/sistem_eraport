@@ -15,10 +15,24 @@ use Illuminate\Validation\Rule;
 
 class GuruController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua data guru, atau tambahkan pagination jika datanya banyak
-        $gurus = Guru::all(); 
+        $query = Guru::query();
+
+        // Terapkan logika pencarian jika parameter 'search' ada
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            
+            // Mencari nama guru, NIP, atau NUPTK
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_guru', 'like', '%' . $search . '%')
+                  ->orWhere('nip', 'like', '%' . $search . '%')
+                  ->orWhere('nuptk', 'like', '%' . $search . '%');
+            });
+        }
+        
+        // Terapkan Pagination dan ambil hasil
+        $gurus = $query->paginate(20)->withQueryString(); 
 
         return view('guru.index', compact('gurus'));
     }

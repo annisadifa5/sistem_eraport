@@ -24,14 +24,43 @@
     @endif
 
     <div class="flex justify-between items-center mb-4">
-        <div class="space-x-2">
-            <a href="{{ route('siswa.export.pdf') }}" 
-            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block">PDF</a>
-            <a href="{{ route('siswa.export.csv') }}" 
-            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block">CSV</a>
-        </div>
+        
+        <div class="space-x-2 flex items-center">
+            {{-- 3. Tombol Import CSV (Menggunakan FORM POST) --}}
+            <form action="{{ route('siswa.import') }}" method="POST" enctype="multipart/form-data" class="inline-block" onsubmit="return confirm('Yakin ingin mengimpor data? Data lama akan diperbarui.')">
+                @csrf
+                
+                <input type="file" name="file" id="import_siswa_csv" style="display: none;" onchange="this.form.submit()">
 
-        <input type="text" placeholder="Search..." class="border px-3 py-1 rounded focus:ring-1 focus:ring-blue-400 outline-none">
+                <button type="button" 
+                        onclick="document.getElementById('import_siswa_csv').click()"
+                        class="bg-blue-500/20 text-blue-700 border border-blue-400 px-4 py-1 rounded hover:bg-blue-500/30 text-sm">
+                    <i class="fa-solid fa-download"></i> Import
+                </button>
+            </form>
+            {{-- 1. Tombol Export PDF --}}
+            <a href="{{ route('siswa.export.pdf') }}" 
+            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block text-sm">
+                <i class="fa-solid fa-file-pdf"></i> PDF
+            </a>
+            {{-- 2. Tombol Export CSV --}}
+            <a href="{{ route('siswa.export.csv') }}" 
+            class="bg-gray-200 px-4 py-1 rounded hover:bg-gray-300 inline-block text-sm">
+                <i class="fa-solid fa-file-csv"></i> CSV
+            </a>
+        </div>
+        {{-- BAGIAN KANAN: Form Pencarian (REVISI PENTING) --}}
+        <form method="GET" action="{{ route('siswa.index') }}" class="inline-block">
+            <input type="text" 
+                name="search" 
+                placeholder="Cari Nama Siswa..." 
+                value="{{ request('search') }}" 
+                onchange="this.form.submit()"
+                class="border px-3 py-1 rounded focus:ring-1 focus:ring-blue-400 outline-none">
+            
+            {{-- Opsional: Tombol submit tersembunyi untuk support Enter Key --}}
+            <button type="submit" style="display:none;"></button>
+        </form>
     </div>
 
     <div class="overflow-x-auto">

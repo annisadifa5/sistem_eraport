@@ -99,6 +99,7 @@ Route::resource('siswa', SiswaController::class);
 Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index'); // <-- Ini benar
 Route::get('siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
 Route::get('siswa/export/csv', [SiswaController::class, 'exportCsv'])->name('siswa.export.csv');
+Route::post('siswa/import', [SiswaController::class, 'importCsv'])->name('siswa.import');
 
 // === Halaman Data Mapel ===
 // routes/web.php

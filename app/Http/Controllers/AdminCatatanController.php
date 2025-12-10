@@ -98,6 +98,7 @@ public function simpanCatatan(Request $request)
         }
     }
 
+<<<<<<< HEAD
     // Simpan catatan utama
     \DB::table('catatan')->updateOrInsert(
         [
@@ -123,3 +124,6 @@ public function simpanCatatan(Request $request)
 
 
 }
+=======
+}
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06

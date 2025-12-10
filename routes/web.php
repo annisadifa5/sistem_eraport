@@ -68,35 +68,56 @@ Route::get('/kelas/{id_kelas}', [KelasController::class, 'show'])->name('kelas.s
 Route::get('kelas/export/pdf', [KelasController::class, 'exportPdf'])->name('kelas.export.pdf');
 Route::get('kelas/export/csv', [KelasController::class, 'exportCsv'])->name('kelas.export.csv');
 
-Route::get('dashboard/data_guru', [GuruController::class, 'dataGuru'])->name('dashboard.data_guru');
-Route::post('dashboard/data_guru', [GuruController::class, 'store'])->name('dashboard.data_guru.store');
-Route::get('dashboard/data_guru/{id_guru}', [GuruController::class, 'show'])->name('dashboard.data_guru.show');
-Route::put('dashboard/data_guru/{id_guru}', [GuruController::class, 'update'])->name('dashboard.data_guru.update');
-Route::delete('dashboard/data_guru/{id_guru}', [GuruController::class, 'destroy'])->name('dashboard.data_guru.destroy');
-Route::get('dashboard/data_guru/export/pdf', [GuruController::class, 'exportPdf'])->name('dashboard.data_guru.export.pdf');
-Route::get('dashboard/data_guru/export/csv', [GuruController::class, 'exportCsv'])->name('dashboard.data_guru.export.csv');
-Route::post('dashboard/data_guru/import/csv', [GuruController::class, 'importCsv'])->name('dashboard.data_guru.import');
+// Route::get('dashboard/data_guru', [GuruController::class, 'dataGuru'])->name('dashboard.data_guru');
+// Route::post('dashboard/data_guru', [GuruController::class, 'store'])->name('dashboard.data_guru.store');
+// Route::get('dashboard/data_guru/{id_guru}', [GuruController::class, 'show'])->name('dashboard.data_guru.show');
+// Route::put('dashboard/data_guru/{id_guru}', [GuruController::class, 'update'])->name('dashboard.data_guru.update');
+// Route::delete('dashboard/data_guru/{id_guru}', [GuruController::class, 'destroy'])->name('dashboard.data_guru.destroy');
+// Route::get('dashboard/data_guru/export/pdf', [GuruController::class, 'exportPdf'])->name('dashboard.data_guru.export.pdf');
+// Route::get('dashboard/data_guru/export/csv', [GuruController::class, 'exportCsv'])->name('dashboard.data_guru.export.csv');
+// Route::post('dashboard/data_guru/import/csv', [GuruController::class, 'importCsv'])->name('dashboard.data_guru.import');
+// // Route::get('/guru', [GuruController::class, 'index'])->name('guru.index');
 
+Route::resource('guru', GuruController::class);
+Route::get('/guru/export/pdf', [GuruController::class, 'exportPdf'])->name('guru.export.pdf');
+Route::get('/guru/export/csv', [GuruController::class, 'exportCsv'])->name('guru.export.csv');
+Route::post('/guru/import/csv', [GuruController::class, 'importCsv'])->name('guru.import');
 
-// === Halaman Data Siswa ===
-Route::get('dashboard/data_siswa', [SiswaController::class, 'dataSiswa'])->name('dashboard.data_siswa');
-Route::post('dashboard/data_siswa', [SiswaController::class, 'store'])->name('dashboard.data_siswa.store');
-Route::get('dashboard/data_siswa/{id_siswa}/edit', [SiswaController::class, 'edit'])->name('dashboard.data_siswa.edit');
-Route::get('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'show'])->name('dashboard.data_siswa.show');
-Route::put('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'update'])->name('dashboard.data_siswa.update');
-Route::delete('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'destroy'])->name('dashboard.data_siswa.destroy');
-Route::get('dashboard/data_siswa/{id_siswa}/export', [SiswaController::class, 'export'])->name('dashboard.data_siswa.export');
-Route::get('dashboard/data_siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('dashboard.data_siswa.export.pdf');
-Route::get('dashboard/data_siswa/export/csv', [SiswaController::class, 'exportCsv'])->name('dashboard.data_siswa.export.csv');
-Route::post('dashboard/data_siswa/import/csv', [SiswaController::class, 'importCsv'])->name('dashboard.data_siswa.import.csv');
+// // === Halaman Data Siswa ===
+// Route::get('dashboard/data_siswa', [SiswaController::class, 'dataSiswa'])->name('dashboard.data_siswa');
+// Route::post('dashboard/data_siswa', [SiswaController::class, 'store'])->name('dashboard.data_siswa.store');
+// Route::get('dashboard/data_siswa/{id_siswa}/edit', [SiswaController::class, 'edit'])->name('dashboard.data_siswa.edit');
+// Route::get('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'show'])->name('dashboard.data_siswa.show');
+// Route::put('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'update'])->name('dashboard.data_siswa.update');
+// Route::delete('dashboard/data_siswa/{id_siswa}', [SiswaController::class, 'destroy'])->name('dashboard.data_siswa.destroy');
+// Route::get('dashboard/data_siswa/{id_siswa}/export', [SiswaController::class, 'export'])->name('dashboard.data_siswa.export');
+// Route::get('dashboard/data_siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('dashboard.data_siswa.export.pdf');
+// Route::get('dashboard/data_siswa/export/csv', [SiswaController::class, 'exportCsv'])->name('dashboard.data_siswa.export.csv');
+// Route::post('dashboard/data_siswa/import/csv', [SiswaController::class, 'importCsv'])->name('dashboard.data_siswa.import.csv');
 
-
+Route::resource('siswa', SiswaController::class);
+Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index'); // <-- Ini benar
+Route::get('siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
+Route::get('siswa/export/csv', [SiswaController::class, 'exportCsv'])->name('siswa.export.csv');
+Route::post('siswa/import', [SiswaController::class, 'importCsv'])->name('siswa.import');
 
 // === Halaman Data Mapel ===
-Route::get('dashboard/data_mapel', [MapelController::class, 'dataMapel'])->name('dashboard.data_mapel');
-Route::post('/dashboard/data_mapel/store', [MapelController::class, 'store'])->name('dashboard.data_mapel.store');
-Route::put('/dashboard/data_mapel/update/{id_mapel}', [MapelController::class, 'update'])->name('dashboard.data_mapel.update');
-Route::delete('/dashboard/data_mapel/delete/{id_mapel}', [MapelController::class, 'destroy'])->name('dashboard.data_mapel.delete');
+// routes/web.php
+Route::prefix('mapel')->name('mapel.')->group(function(){
+    Route::get('/', [MapelController::class,'index'])->name('index');
+    Route::get('/create', [MapelController::class,'create'])->name('create');
+    Route::post('/store', [MapelController::class,'store'])->name('store');
+    Route::get('/edit/{id_mapel}', [MapelController::class,'edit'])->name('edit');
+    Route::put('/update/{id_mapel}', [MapelController::class,'update'])->name('update');
+    Route::delete('/delete/{id_mapel}', [MapelController::class,'destroy'])->name('destroy');
+});
+
+
+
+// Route::get('dashboard/data_mapel', [MapelController::class, 'dataMapel'])->name('dashboard.data_mapel');
+// Route::post('/dashboard/data_mapel/store', [MapelController::class, 'store'])->name('dashboard.data_mapel.store');
+// Route::put('/dashboard/data_mapel/update/{id_mapel}', [MapelController::class, 'update'])->name('dashboard.data_mapel.update');
+// Route::delete('/dashboard/data_mapel/delete/{id_mapel}', [MapelController::class, 'destroy'])->name('dashboard.data_mapel.delete');
 //export
 Route::get('/dashboard/data_mapel/export/pdf', [MapelController::class, 'exportPdf'])->name('dashboard.data_mapel.export.pdf');
 Route::get('/dashboard/data_mapel/export/csv', [MapelController::class, 'exportCsv'])->name('dashboard.data_mapel.export.csv');
@@ -156,6 +177,7 @@ Route::post('/input/catatan/simpan', [AdminCatatanController::class, 'simpanCata
 Route::get('/get-siswa/{id_kelas}', [AdminCatatanController::class, 'getSiswa']);
 
 
+<<<<<<< HEAD
 // Route::get('cetak/rapor', [AdminCetakController::class, 'cetakNilai'])->name('cetak.rapor');
 Route::prefix('cetak')->controller(CetakController::class)->group(function () {
     Route::get('/rapor', 'rapor')->name('cetak.rapor');
@@ -167,6 +189,10 @@ Route::prefix('cetak')->group(function () {
     Route::get('/rapor/{id_siswa}', [CetakController::class, 'rapor'])->name('cetak.rapor');
     Route::get('/rapor/{id_siswa}/pdf', [CetakController::class, 'raporPdf'])->name('cetak.rapor.pdf');
 });
+=======
+
+Route::get('input/cetak', [AdminCetakController::class, 'cetakNilai'])->name('input.cetak');
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06
 
 // === Halaman Guru ===
 // Route::get('guru/dashboard', [DashboardController::class, 'index'])->name('dashboard.guru');
@@ -191,4 +217,18 @@ Route::prefix('wali')->name('wali.')->group(function () {
     Route::get('input/cetak', [InputNilaiWaliController::class, 'cetakNilai'])->name('input.cetak');
 });
 
+<<<<<<< HEAD
 
+=======
+// Route::prefix('cetak')->controller(CetakController::class)->group(function () {
+//     Route::get('/rapor', 'rapor')->name('cetak.rapor');
+//     Route::get('/rapor/pdf', 'raporPdf')->name('cetak.rapor.pdf');
+// });
+
+Route::prefix('cetak')->group(function () {
+    Route::get('/rapor', [CetakController::class, 'index'])->name('cetak.rapor.index');
+    Route::get('/rapor/{id_siswa}', [CetakController::class, 'rapor'])->name('cetak.rapor');
+    Route::get('/rapor/{id_siswa}/pdf', [CetakController::class, 'raporPdf'])->name('cetak.rapor.pdf');
+    Route::post('/rapor/pdf/massal', [CetakController::class,'raporPdfMassal'])->name('cetak.rapor.pdf.massal');
+});
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06

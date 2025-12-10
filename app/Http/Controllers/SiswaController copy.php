@@ -4,218 +4,331 @@ namespace App\Http\Controllers;
 
 use App\Models\Siswa;
 use App\Models\DetailSiswa;
-use App\Models\Kelas; // Diperlukan untuk dropdown
-use App\Models\Ekskul; // Diperlukan untuk dropdown
+use App\Models\Kelas;
+use App\Models\Ekskul;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon; // Digunakan untuk format tanggal
+use Illuminate\Support\Facades\Response;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+use League\Csv\Reader;
+
+
+
 
 class SiswaController extends Controller
 {
-    // Field fillable untuk Siswa
-    protected $siswaFillable = ['nipd', 'nisn', 'nama_siswa', 'jenis_kelamin', 'tingkat', 'id_kelas', 'id_ekskul'];
-
     /**
-     * Tampilkan daftar semua siswa (index).
+     * Tampilkan list siswa
      */
-    public function index(Request $request)
+    public function dataSiswa(Request $request)
     {
-        $query = Siswa::with('kelas', 'ekskul');
-        // Eager load relasi kelas dan ekskul untuk tampilan index
-        $siswas = Siswa::with('kelas', 'ekskul')->paginate(20); 
+        $query = Siswa::with('kelas');
+
         if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            
-            // Mencari nama siswa yang mengandung string pencarian (case-insensitive)
-            // $query->where('nama_siswa', 'like', '%' . $search . '%');
-            
-            // Opsi: Anda juga bisa menambahkan pencarian berdasarkan NISN atau NIPD
-            
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_siswa', 'like', '%' . $search . '%')
-                  ->orWhere('nisn', 'like', '%' . $search . '%')
-                  ->orWhere('nipd', 'like', '%' . $search . '%');
-            });
-            
+            $query->where('nama_siswa', 'like', '%'.$request->search.'%')
+                ->orWhere('nisn', 'like', '%'.$request->search.'%')
+                ->orWhere('nipd', 'like', '%'.$request->search.'%');
         }
-        
-        // 2. Terapkan Pagination dan ambil hasil
-        $siswas = $query->paginate(20)->withQueryString();
-        return view('siswa.index', compact('siswas'));
+
+        $siswa = $query->paginate(50);
+
+        $kelas = Kelas::all();
+        $ekskul = Ekskul::all();
+
+        return view('dashboard.data_siswa', compact('siswa', 'kelas', 'ekskul'));
     }
 
     /**
-     * Tampilkan form untuk membuat siswa baru.
-     */
-    public function create()
-    {
-        $kelasList = Kelas::orderBy('nama_kelas')->get();
-        $ekskulList = Ekskul::orderBy('nama_ekskul')->get();
-        
-        return view('siswa.create', compact('kelasList', 'ekskulList'));
-    }
-
-    /**
-     * Simpan siswa baru ke database (Multi-Model Transaction).
+     * Simpan siswa + detail siswa (modal tambah)
      */
     public function store(Request $request)
     {
-        // 1. Validasi Data
+        // Validasi siswa
         $request->validate([
-            // Siswa (Wajib)
-            'nipd' => 'required|string|max:20|unique:siswa,nipd',
-            'nisn' => 'required|string|max:10|unique:siswa,nisn',
-            'nama_siswa' => 'required|string|max:255',
-            'jenis_kelamin' => 'required|in:L,P',
-            'tingkat' => 'required|string|max:10',
-            'id_kelas' => 'required|integer|exists:kelas,id_kelas',
-            'id_ekskul' => 'nullable|integer|exists:ekskul,id_ekskul',
-
-            // Detail Siswa (Beberapa field penting)
-            'nik' => 'nullable|string|max:20|unique:detail_siswa,nik',
-            'email' => 'nullable|email|unique:detail_siswa,email',
-            'tempat_lahir' => 'nullable|string|max:100',
-            'tanggal_lahir' => 'nullable|date',
-            'nama_ayah' => 'nullable|string|max:255',
-            'nama_ibu' => 'nullable|string|max:255',
-            // ... (Tambahkan validasi untuk field DetailSiswa lainnya)
+            'nipd'          => 'required',
+            'nisn'          => 'required',
+            'nama_siswa'    => 'required',
+            'jenis_kelamin' => 'required',
+            'tingkat'       => 'required',
+            'id_kelas'      => 'required'
         ]);
 
-        DB::beginTransaction();
-        try {
-            // 2. Create Model Siswa
-            $siswa = Siswa::create($request->only($this->siswaFillable));
+        DB::transaction(function () use ($request) {
 
-            // 3. Create Model DetailSiswa (Relasi HasOne)
-            $detailFields = (new DetailSiswa())->getFillable();
-            
-            // Hapus id_siswa dan id_kelas dari detailFields karena akan di-handle oleh relasi
-            $detailData = $request->only(array_diff($detailFields, ['id_siswa', 'id_kelas']));
+            // Insert ke tabel siswa
+            $siswa = Siswa::create([
+                'nipd'          => $request->nipd,
+                'nisn'          => $request->nisn,
+                'nama_siswa'    => $request->nama_siswa,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tingkat'       => $request->tingkat,
+                'id_kelas'      => $request->id_kelas,
+                'id_ekskul'     => $request->id_ekskul,
+            ]);
 
-            // Hubungkan id_kelas juga di detail_siswa (jika diperlukan)
-            $detailData['id_kelas'] = $request->id_kelas;
+            // Ambil semua data detail
+            $detailData = $request->except([
+                'nipd',
+                'nisn',
+                'nama_siswa',
+                'jenis_kelamin',
+                'tingkat',
+                'id_ekskul',
+                '_token',
+            ]);
 
-            $siswa->detail()->create($detailData);
+            // WAJIB: id_siswa
+            $detailData['id_siswa'] = $siswa->id_siswa; // gunakan PK yg benar
 
-            DB::commit();
-            return redirect()->route('siswa.index')->with('success', 'Data Siswa berhasil ditambahkan!');
+            // simpan detail
+            DetailSiswa::create($detailData);
+        });
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error("Error saat menyimpan data Siswa: " . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan data siswa: ' . $e->getMessage());
-        }
+        return back()->with('success', 'Siswa berhasil ditambahkan');
     }
 
+
     /**
-     * Menampilkan detail data siswa tertentu beserta relasinya.
+     * Detail siswa (modal hanya view)
      */
     public function show($id)
     {
-        // Eager load relasi detail, kelas, dan ekskul
-        $siswa = Siswa::with('detail', 'kelas', 'ekskul')->findOrFail($id);
-
-        return view('siswa.show', compact('siswa'));
+        $siswa = Siswa::with('detail', 'kelas')->findOrFail($id);
+        return response()->json($siswa);
     }
-    
+
     /**
-     * Tampilkan form untuk mengedit siswa tertentu.
+     * Ambil data untuk modal edit
      */
     public function edit($id)
     {
-        $siswa = Siswa::with('detail', 'kelas', 'ekskul')->findOrFail($id);
-        $kelasList = Kelas::orderBy('nama_kelas')->get();
-        $ekskulList = Ekskul::orderBy('nama_ekskul')->get();
-
-        return view('siswa.edit', compact('siswa', 'kelasList', 'ekskulList'));
+        $siswa = Siswa::with('detail')->findOrFail($id);
+        return response()->json($siswa);
     }
 
     /**
-     * Perbarui data siswa tertentu di database (Multi-Model Transaction).
+     * Update siswa + detail siswa
      */
     public function update(Request $request, $id)
     {
-        $siswa = Siswa::findOrFail($id);
-        
-        // 1. Validasi Data
-        $request->validate([
-            // Siswa (Ignored for unique check)
-            'nipd' => ['required', 'string', 'max:20', Rule::unique('siswa', 'nipd')->ignore($siswa->id_siswa, 'id_siswa')],
-            'nisn' => ['required', 'string', 'max:10', Rule::unique('siswa', 'nisn')->ignore($siswa->id_siswa, 'id_siswa')],
-            'nama_siswa' => 'required|string|max:255',
-            'jenis_kelamin' => 'required|in:L,P',
-            'id_kelas' => 'required|integer|exists:kelas,id_kelas',
-            // ... (Validasi lainnya)
-            
-            // Detail Siswa (Ignored for unique check)
-            'nik' => ['nullable', 'string', 'max:20', Rule::unique('detail_siswa', 'nik')->ignore($siswa->id_siswa, 'id_siswa')],
-            'email' => ['nullable', 'email', Rule::unique('detail_siswa', 'email')->ignore($siswa->id_siswa, 'id_siswa')],
-        ]);
-        
-        DB::beginTransaction();
-        try {
-            // 2. Update Model Siswa
-            $siswa->update($request->only($this->siswaFillable));
+        DB::transaction(function () use ($request, $id) {
 
-            // 3. Update Model DetailSiswa (updateOrCreate)
-            $detailFields = (new DetailSiswa())->getFillable();
-            $detailData = $request->only(array_diff($detailFields, ['id_siswa']));
+            $siswa = Siswa::findOrFail($id);
 
-            // Hubungkan id_kelas juga di detail_siswa
-            $detailData['id_kelas'] = $request->id_kelas;
+            // Update data siswa
+            $siswa->update([
+                'nipd'          => $request->nipd,
+                'nisn'          => $request->nisn,
+                'nama_siswa'    => $request->nama_siswa,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tingkat'       => $request->tingkat,
+                'id_kelas'      => $request->id_kelas,
+                'nama_kelas'    => $siswa->kelas->nama_kelas, 
+                'id_ekskul'     => $request->id_ekskul,
+            ]);
 
-            $siswa->detail()->updateOrCreate(
-                ['id_siswa' => $siswa->id_siswa],
-                $detailData
-            );
+            // Ambil data detail siswa
+            $detailData = $request->except([
+                'nipd', 'nisn', 'nama_siswa', 'jenis_kelamin', 
+                'tingkat', 'id_ekskul'
+            ]);
 
-            DB::commit();
-            return redirect()->route('siswa.index')->with('success', 'Data Siswa berhasil diperbarui!');
+            // Jika detail belum ada, buat
+            if (!$siswa->detail) {
+                $detailData['id_siswa'] = $id;
+                DetailSiswa::create($detailData);
+            } else {
+                $siswa->detail->update($detailData);
+            }
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error("Error saat memperbarui data Siswa: " . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data siswa: ' . $e->getMessage());
-        }
+        });
+
+        return redirect()->back()->with('success', 'Data siswa berhasil diperbarui');
     }
 
     /**
-     * Hapus siswa tertentu dari database (Multi-Model Transaction).
+     * Hapus siswa + detail siswa
      */
     public function destroy($id)
     {
-        DB::beginTransaction();
+        DB::transaction(function () use ($id) {
 
-        try {
-            $siswa = Siswa::findOrFail($id);
-            
-            // 1. Hapus data UlanganHarian terkait (hasMany)
-            //    Panggil delete() pada query builder relasi
-            $siswa->ulangan()->delete(); 
-            
-            // 2. Hapus data DetailSiswa terkait (hasOne)
-            //    Panggil delete() pada query builder relasi, lebih aman daripada menghapus instance.
-            $siswa->detail()->delete(); // <<< PERBAIKAN DI SINI
+            // Hapus detail siswa
+            DetailSiswa::where('id_siswa', $id)->delete();
 
-            // 3. Hapus Model Siswa utama
-            $siswa->delete();
+            // Hapus siswa
+            Siswa::where('id_siswa', $id)->delete();
+        });
 
-            DB::commit();
-            return redirect()->route('siswa.index')->with('success', 'Data Siswa dan detailnya berhasil dihapus!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Log error secara detail
-            \Log::error("Gagal menghapus Siswa $id: " . $e->getMessage()); 
-            return redirect()->back()->with('error', 'Gagal menghapus data siswa: ' . $e->getMessage());
-        }
+        return redirect()->back()->with('success', 'Data siswa berhasil dihapus');
     }
 
-    // =========================================================================
-    // IMPORT CSV METHOD (Revisi Lengkap)
-    // =========================================================================
+    public function export($id)
+    {
+        $s = Siswa::with('detail')->findOrFail($id);
+        $d = $s->detail;
+
+        $fileName = "data_siswa_{$s->id_siswa}.csv";
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+        ];
+
+        $callback = function() use ($s, $d) {
+            $file = fopen('php://output', 'w');
+
+            // HEADER CSV
+            fputcsv($file, [
+                // DATA SISWA
+                'NIPD','NISN','Nama','Jenis Kelamin','Tingkat','ID Kelas',
+
+                // DETAIL SISWA LENGKAP
+                'Tempat Lahir','Tanggal Lahir','Agama','Alamat','Kelurahan','Kecamatan','Kode Pos',
+                'Telepon','No HP','Email','NIK','RT','RW','Dusun','Jenis Tinggal','Alat Transportasi',
+                'SKHUN','Penerima KPS','No KPS','Rombel','No Peserta UN','No Seri Ijazah','Penerima KIP',
+                'No KIP','Nama KIP','No KKS','No Regis Akta','Bank','No Rek','Atas Nama Rek','Layak PIP Usulan',
+                'Alasan Layak PIP','Kebutuhan Khusus','Sekolah Asal','Anak Ke Berapa','Lintang','Bujur','No KK',
+                'BB','TB','Lingkar Kepala','Jml Saudara Kandung','Jarak Rumah',
+
+                // AYAH
+                'Nama Ayah','Tahun Lahir Ayah','Jenjang Pendidikan Ayah','Pekerjaan Ayah','Penghasilan Ayah','NIK Ayah',
+
+                // IBU
+                'Nama Ibu','Tahun Lahir Ibu','Jenjang Pendidikan Ibu','Pekerjaan Ibu','Penghasilan Ibu','NIK Ibu',
+
+                // WALI
+                'Nama Wali','Tahun Lahir Wali','Jenjang Pendidikan Wali','Pekerjaan Wali','Penghasilan Wali','NIK Wali'
+            ]);
+
+            // ROW DATA
+            fputcsv($file, [
+                // Siswa
+                $s->nipd,
+                $s->nisn,
+                $s->nama_siswa,
+                $s->jenis_kelamin,
+                $s->tingkat,
+                $s->id_kelas,
+
+                // Detail lengkap
+                $d->tempat_lahir ?? '-',
+                $d->tanggal_lahir ?? '-',
+                $d->agama ?? '-',
+                $d->alamat ?? '-',
+                $d->kelurahan ?? '-',
+                $d->kecamatan ?? '-',
+                $d->kode_pos ?? '-',
+                $d->telepon ?? '-',
+                $d->no_hp ?? '-',
+                $d->email ?? '-',
+                $d->nik ?? '-',
+                $d->rt ?? '-',
+                $d->rw ?? '-',
+                $d->dusun ?? '-',
+                $d->jenis_tinggal ?? '-',
+                $d->alat_transportasi ?? '-',
+                $d->skhun ?? '-',
+                $d->penerima_kps ?? '-',
+                $d->no_kps ?? '-',
+                $d->rombel ?? '-',
+                $d->no_peserta_ujian_nasional ?? '-',
+                $d->no_seri_ijazah ?? '-',
+                $d->penerima_kip ?? '-',
+                $d->no_kip ?? '-',
+                $d->nama_kip ?? '-',
+                $d->no_kks ?? '-',
+                $d->no_regis_akta_lahir ?? '-',
+                $d->bank ?? '-',
+                $d->no_rek_bank ?? '-',
+                $d->rek_atas_nama ?? '-',
+                $d->layak_pip_usulan ?? '-',
+                $d->alasan_layak_pip ?? '-',
+                $d->kebutuhan_khusus ?? '-',
+                $d->sekolah_asal ?? '-',
+                $d->anak_ke_berapa ?? '-',
+                $d->lintang ?? '-',
+                $d->bujur ?? '-',
+                $d->no_kk ?? '-',
+                $d->bb ?? '-',
+                $d->tb ?? '-',
+                $d->lingkar_kepala ?? '-',
+                $d->jml_saudara_kandung ?? '-',
+                $d->jarak_rumah ?? '-',
+
+                // AYAH
+                $d->nama_ayah ?? '-',
+                $d->tahun_lahir_ayah ?? '-',
+                $d->jenjang_pendidikan_ayah ?? '-',
+                $d->pekerjaan_ayah ?? '-',
+                $d->penghasilan_ayah ?? '-',
+                $d->nik_ayah ?? '-',
+
+                // IBU
+                $d->nama_ibu ?? '-',
+                $d->tahun_lahir_ibu ?? '-',
+                $d->jenjang_pendidikan_ibu ?? '-',
+                $d->pekerjaan_ibu ?? '-',
+                $d->penghasilan_ibu ?? '-',
+                $d->nik_ibu ?? '-',
+
+                // WALI
+                $d->nama_wali ?? '-',
+                $d->tahun_lahir_wali ?? '-',
+                $d->jenjang_pendidikan_wali ?? '-',
+                $d->pekerjaan_wali ?? '-',
+                $d->penghasilan_wali ?? '-',
+                $d->nik_wali ?? '-',
+            ]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportPdf()
+    {
+        $siswa = Siswa::all();
+
+        $pdf = Pdf::loadView('exports.data_siswa_pdf', [
+            'siswa' => $siswa
+        ]);
+
+        return $pdf->download('data-siswa.pdf');
+    }
+
+    public function exportCsv()
+    {
+        $siswa = Siswa::all();
+
+        return response()->streamDownload(function() use ($siswa) {
+
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['No','Nama','NIPD','NISN','Jenis Kelamin','Tingkat','Kelas']);
+
+            $no = 1;
+
+            foreach ($siswa as $s) {
+                fputcsv($file, [
+                    $no++,
+                    $s->nama_siswa,
+                    $s->nipd,
+                    $s->nisn,
+                    $s->jenis_kelamin,
+                    $s->tingkat,
+                    $s->kelas->nama_kelas,
+                ]);
+            }
+
+            fclose($file);
+
+        }, 'data-siswa.csv', [
+            'Content-Type' => 'text/csv'
+        ]);
+    }
 
     public function importCsv(Request $request)
     {
@@ -468,4 +581,9 @@ class SiswaController extends Controller
 
         return back()->with('success', "Import selesai! Total baris masuk: $count");
     }
+
+
+
+
+
 }

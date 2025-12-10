@@ -204,6 +204,7 @@ input[type="date"]:valid {
           if (!this.sidebarOpen) {
               this.dataSekolahOpen = false;
               this.inputNilaiOpen = false;
+              this.cetakNilaiOpen = false;
           }
       }
   }"

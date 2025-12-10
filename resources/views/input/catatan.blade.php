@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="id" x-data="{ sidebarOpen: true, dataSekolahOpen: true, inputNilaiOpen: true }" x-cloak>
 <head>
@@ -30,6 +31,17 @@
                 <i class="text-blue-600"></i> Catatan
             </h2>
         </div>
+=======
+@extends('layouts.master')
+
+@section('title', 'Catatan Siswa')
+
+@php
+    $inputNilaiOpen = true;
+@endphp
+
+@section('content')
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06
 
         <!-- Notifikasi -->
         @if (session('success'))
@@ -43,20 +55,32 @@
         @endif
 
         <!-- Filter Form -->
+<<<<<<< HEAD
         <form method="GET" action="{{ route('input.catatan') }}">
             <div class="grid grid-cols-4 gap-4 mb-6 text-sm">
+=======
+        <form method="GET" action="{{ route('input.catatan') }}" class="mb-6">
+
+            <!-- 2 Kolom Filter -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06
 
                 <!-- Kelas -->
-                <select name="id_kelas" id="kelasSelect" class="border rounded-lg px-3 py-2">
-                    <option value="">Pilih Kelas</option>
-                    @foreach ($kelas as $k)
-                        <option value="{{ $k->id_kelas }}" {{ $request->id_kelas == $k->id_kelas ? 'selected' : '' }}>
-                            {{ $k->nama_kelas }}
-                        </option>
-                    @endforeach
-                </select>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <select name="id_kelas" id="kelasSelect" class="w-full border rounded-lg px-3 py-2">
+                        <option value="">-- Pilih Kelas --</option>
+                        @foreach ($kelas as $k)
+                            <option value="{{ $k->id_kelas }}" 
+                                {{ request('id_kelas') == $k->id_kelas ? 'selected' : '' }}>
+                                {{ $k->nama_kelas }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <!-- Siswa -->
+<<<<<<< HEAD
                 <select name="id_siswa" id="siswaSelect" class="border rounded-lg px-3 py-2">
                     <option value="">Pilih Siswa</option>
                     @foreach ($siswa as $s)
@@ -85,13 +109,44 @@
                         @endforeach
                     </select>
                  </div>
+=======
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Siswa</label>
+                    <select name="id_siswa" id="siswaSelect" class="w-full border rounded-lg px-3 py-2">
+                        <option value="">-- Pilih Siswa --</option>
+                        @foreach ($siswa as $s)
+                            <option value="{{ $s->id_siswa }}" 
+                                {{ request('id_siswa') == $s->id_siswa ? 'selected' : '' }}>
+                                {{ $s->nama_siswa }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <button class="bg-blue-600 text-white px-4 py-2 rounded">Tampilkan</button>
+            </div>
+
+            <!-- Tombol -->
+            <div class="mt-4">
+                <button class="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-lg shadow">
+                    Tampilkan
+                </button>
+            </div>
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06
+
         </form>
 
+<<<<<<< HEAD
                 <script>
                 document.getElementById('kelasSelect').addEventListener('change', function() {
                     let idKelas = this.value;
+=======
+
+        <!-- AJAX GET SISWA -->
+        <script>
+            document.getElementById('kelasSelect').addEventListener('change', function() {
+                let idKelas = this.value;
+                let siswaSelect = document.getElementById('siswaSelect');
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06
 
                     // Kosongkan dropdown siswa sebelum diisi ulang
                     let siswaSelect = document.getElementById('siswaSelect');
@@ -221,6 +276,7 @@
                    value="{{ $rapor->alpha ?? '' }}">
         </div>
 
+<<<<<<< HEAD
     </div>
 </div>
 
@@ -251,3 +307,6 @@
 
 </body>
 </html>
+=======
+@endsection
+>>>>>>> bf68eb4bf2da6853694ba2000bf4737aaab6db06

@@ -45,11 +45,30 @@ class CetakController extends Controller
     /** Export PDF rapor */
     public function raporPdf($id_siswa)
     {
-        $siswa = Siswa::with(['detail', 'kelas.guru'])->findOrFail($id_siswa);
+        $siswa = Siswa::with(['kelas','detail'])->findOrFail($id_siswa);
 
-        $pdf = Pdf::loadView('cetak.rapor', compact('siswa'))
-            ->setPaper('A4', 'portrait');
+    $nilai = Rapor::with('mapel')
+        ->where('id_siswa',$id_siswa)
+        ->orderBy('id_mapel')
+        ->get();
 
-        return $pdf->download('Rapor-'.$siswa->nama_siswa.'.pdf');
+    return Pdf::loadView('cetak.rapor_pdf', compact('siswa','nilai'))
+        ->setPaper('A4', 'portrait')
+        ->stream("RAPOR_{$siswa->nama_siswa}.pdf");
     }
+
+    public function raporPdfMassal(Request $request)
+    {
+        if(!$request->id_siswa){
+            return back()->with('warning','Pilih minimal satu siswa!');
+        }
+
+        $siswa = Siswa::whereIn('id_siswa', $request->id_siswa)->get();
+
+        $pdf = PDF::loadView('cetak.pdf.massal_rapor', compact('siswa'))
+                ->setPaper('a4', 'portrait');
+
+        return $pdf->download('RAPOR_MASSAL_'.date('Y').'.pdf');
+    }
+
 }
